@@ -1,13 +1,15 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-// Define the Display class
-class Display {
+// Define the OpenRemiseDisplay class
+class OpenRemiseDisplay {
 public:
-    void init();
+    void begin();
     void update();
     void clear();
-};  
-
-
+ 
+private:
+   
+    bool initialized_display;
+}; 
 #endif // DISPLAY

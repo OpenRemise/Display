@@ -1,10 +1,11 @@
 #include "Display.h"
 
-void Display::init() {
+void Display::begin() {
     // Initialization code for the display
     // Initialize display hardware or software components
-    // Example: Initialize display driver, set up buffers, etc.
-    // Initialize display driver
+    // Exabegimple: Initialize display driver, set up buffers, etc.
+    // Initialize display driver see  EA code example 
+
 
 
 } 
