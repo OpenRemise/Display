@@ -37,7 +37,19 @@ struct Protokoll {
 #define JSON_DISPLAY_TEXT "display_text" // start / stop Text to be shown on the display True / false 
 // More JSON elements can be added as needed
 
+class protokoll
+{
+private:
+    // Private member variables and functions for Protokoll management
+    // Example: Message buffers, state variables, etc.
 
+public:
+int8_t StartLearnMode();
+int8_t StopLearnMode();    
+int8_t GetJSONdata(const char* JSONString);
+int8_t SendProtokollMessage(const Protokoll& message);
+int8_t begin();
+}
 
 
 #endif // PROTOKOLL_H   
