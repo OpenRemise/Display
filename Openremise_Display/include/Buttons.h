@@ -19,9 +19,9 @@
 class Buttons {
 public:
     
-    int8_t begin(int Pin_a, int LED_a ,int Pin_b, int LED_b );
-    int8_t read();// Read button states application side 
-    int8_t update() ; // Update button states HW side
+    uint8_t begin(int Pin_a, int LED_a ,int Pin_b, int LED_b );
+    uint8_t read();// Read button states application side 
+    uint8_t update() ; // Update button states HW side
  
 
 private:

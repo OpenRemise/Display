@@ -1,12 +1,19 @@
 
-#ifndef PROTOKOLL_H
-#define PROTOKOLL_H
+
+#pragma once
+
 // Protokoll.h contain definition of  data with in the Protokoll 
-#include <cstdint>
+#include "stdint.h"
+#include <Arduino.h>
+//#include "ArduinoJson.h"  // JSON handling library
+#include "eeprom.h"   // EEPROM handling
+//#include "flash.h"  // Flash handling
+
+
 // old School type definition
 struct Protokoll {
     int id;               // Unique identifier for the protocol message
-    uint8_t Data[8]    ;  // Data payload
+    uint8_t Data[8];      // Data payload
 };  
 
 // Command codes
@@ -37,19 +44,31 @@ struct Protokoll {
 #define JSON_DISPLAY_TEXT "display_text" // start / stop Text to be shown on the display True / false 
 // More JSON elements can be added as needed
 
-class protokoll
+class OpenRemiseProtokoll
 {
-private:
-    // Private member variables and functions for Protokoll management
-    // Example: Message buffers, state variables, etc.
 
 public:
 int8_t StartLearnMode();
 int8_t StopLearnMode();    
 int8_t GetJSONdata(const char* JSONString);
-int8_t SendProtokollMessage(const Protokoll& message);
+int8_t SendProtokollMessage(const char &message);
 int8_t begin();
-}
+int8_t update(const char* JSONString);
+
+private:
+    // Private member variables and functions for Protokoll management
+    // Example: Message buffers, state variables, etc.
+    //flash section 
+    //eeprom section
+    //runtime variables
+    bool learn_mode_active;
+    // buffer for incoming JSON data
+    char json_buffer[256];
+    char learn_value[64][16]; // buffer for learn values
 
 
-#endif // PROTOKOLL_H   
+};
+
+
+
+// end of PROTOKOLL_H   

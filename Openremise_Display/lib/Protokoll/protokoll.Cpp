@@ -1,12 +1,12 @@
 // Protokoll handler implementation file
 #include "protokoll.h"
-#include "stdint.h"
+
 
 
 /// @brief  Initialize the Protokoll module
 /// @return     0 on success, error code otherwise
 
-uint8_t Protokoll::begin() {
+int8_t OpeneremiseProtokoll::begin() {
     // Implementation for initializing the Protokoll module
     // Clear Counter for messages, buffers, etc.
     // Check EEprom on validity
@@ -14,12 +14,12 @@ uint8_t Protokoll::begin() {
     // Check free memory from Epprom
     // Transfern known Json to runtime variables
     // Setup Protokoll parameters
-
-
-
-
-
-
+    // read out EEPROM values ( json names only )
+    // Read out Flash values ( json names only from learning mode )
+    // Sort names in alphbetic order for faster search
+    
+    // Initialize learn mode active flag
+    learn_mode_active = false;
 
 
     return 0; // Placeholder return value
@@ -35,7 +35,7 @@ uint8_t Protokoll::begin() {
 // Handle command codes
 // Start learning mode
 
-int8_t Protokoll::Protokoll(const char* JSONString) {
+int8_t OpeneremiseProtokoll::update(const char* JSONString) {
         // Implementation for getting JSON data
         // get data  from Uart until  ":" or end of stream
         // Parse JSON string and extract relevant information
@@ -46,7 +46,7 @@ int8_t Protokoll::Protokoll(const char* JSONString) {
 
     } 
 
-int8_t Protokoll::StartLearnMode() {
+int8_t OpeneremiseProtokoll::StartLearnMode() {
     // Implementation for starting learn mode
     // Set system state to learn mode
     // Initialize learn mode parameters
@@ -54,7 +54,7 @@ int8_t Protokoll::StartLearnMode() {
     return 0; // Placeholder return value
 
 }   
-int8_t Protokoll::StopLearnMode() {
+int8_t OpeneremiseProtokoll::StopLearnMode() {
         // Implementation for stopping learn mode
         // Reset system state from learn mode to normal mode
 
@@ -63,7 +63,7 @@ int8_t Protokoll::StopLearnMode() {
     }   
 // this function will be not ussed in the first release
 
-int8_t Protokoll::SendProtokollMessage(const Protokoll& message) {
+int8_t OpeneremiseProtokoll::SendProtokollMessage(const Protokoll& message) {
           // Implementation for sending Protokoll message
             // Format message according to Protokoll specifications
             // Transmit message via appropriate communication interface
