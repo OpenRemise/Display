@@ -18,11 +18,12 @@
 // Define the Buttons class
 class Buttons {
 public:
+    Buttons(); // Constructor
     
     uint8_t begin(int Pin_a, int LED_a ,int Pin_b, int LED_b );
     uint8_t read();// Read button states application side 
     uint8_t update() ; // Update button states HW side
- 
+    bool   SetLED(uint8_t led, bool state); // set LED state
 
 private:
     // Private member variables and functions for button management
@@ -41,7 +42,7 @@ private:
     uint8_t pinB;
     uint8_t ledA;
     uint8_t ledB;
-
+    uint8_t Button = NO_BUTTONS;
 
 };
 
