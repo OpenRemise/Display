@@ -1,93 +1,75 @@
-
-//Initialisierung 
 #include <Arduino.h>
-#include <EEPROM.h>
-
-#include <stdint.h>
-#include "Buttons.h"
+#include <Wire.h>
 #include "Display.h"
-#include "protokoll.h"
-//Global Variables
-#include "main.h"
+#include "Buttons.h"
 
+/* SH1107 128x128, I2C, Hardware I2C, Page-Mode */
+OpenRemiseDisplay display;
+// buttons for up and down 
+Buttons buttons;
 
-// Main setup and loop functions
-Buttons Button;
-OpenRemiseDisplay Display;
-OpenRemiseProtokoll Protokoll; // Protokoll instance  
 
 void setup() {
+  Serial.begin(115200);
+  // Buttons initialisieren
+        buttons.begin(PIND4, PIND5, PIND6 ,PIND7); // Button and LED pins
+          buttons.SetLED(BUTTON_A, true);
+          buttons.SetLED(BUTTON_B, true);
+  // Display initialisieren
+  Serial.println(F("SH1107 Init Test"));
+    uint8_t ret = display.begin();
+    if (ret != 0x00) {
+        Serial.println(F("Display init failed!"));
+         }
+   
+    
+     if (ret == 0x00) { 
+      // if  display is ok  
+        // Show welcome screen
+        display.ShowWelcome();
+     // if  not blink with button LEDS 
+      buttons.SetLED(BUTTON_A, false);
+      buttons.SetLED(BUTTON_B, false);
+      }
+      else {
+       // Blink both LEDs to indicate error
+        while (1) {
+            buttons.SetLED(BUTTON_A, true);
+            buttons.SetLED(BUTTON_B, false);
+            delay(500);
+            buttons.SetLED(BUTTON_A, false);
+            buttons.SetLED(BUTTON_B, true);
+            delay(500);
+        }
+     }
+//Wait  for S3json data send 
+// if no dat send with in the first 5 sec show error
 
-SYS_Init();
-
-   // Initializecomponents here
-   SYS.State = Button.begin(BUTTON_A_PIN, LED_A_PIN, BUTTON_B_PIN, LED_B_PIN);
-   SYS.State = Display.begin();
-   SYS.State = Protokoll.begin(); // also init from  EEprom content 
+buttons.SetLED(BUTTON_B, true);
 
 
-// Check for initialization errors
 
-if (SYS.State == ERROR_STATE) {
-#ifdef SERIAL_DEBUG
-Serial.println("Error during Initialization!");
-#endif
-Display.ShowError();
-}else {
-SYS.State = RUN;
-Display.ShowWelcome();
+//Initend
+buttons.SetLED(BUTTON_B, false);
+buttons.SetLED(BUTTON_A, false);
+display.clear();
+display.ShowNormalMode();
+
 }
-#ifdef SERIAL_DEBUG
-    Serial.println("Initialization Complete.");
-#endif
-}
-
 
 void loop() {
-    // put your main code here, to run repeatedly:
-    //Buttons_Task();
-    //Display_Task();
-    //Protokoll_Task();
-    //EEprom_Task();
-
-    //timing and state management
-    if (SYS.time_interval >= 1.0) { // 1 second interval
-        SYS.time_interval = 0.0;
-        SYS.time_stamp += 1.0;
-        // Perform time-based tasks here
-    }   
-
-if (SYS.Learnsatus == LEARN_MODE) {
-    // Perform actions related to learn mode
-   // Display new learnd Values 
-    Display.ShowLearnMode();
-
-  } else if (SYS.State == ERROR_STATE) {
-    // Handle error state
-    Display.ShowError();// Display error message Invert display
-  } else {
-    // Normal operation code
-    Display.ShowNormalMode(); // Display normal operation information 
+  //absichtlich leer
+  /* wait vor Event 
+  buttons.update();
+  if ( buttons.read() != NO_BUTTONS ) {
+     if (buttons.read() & BUTTON_A_PRESSED) {
+        Serial.println(F("Button A pressed!"));
+     }
+     if (buttons.read() & BUTTON_B_PRESSED) {
+        Serial.println(F("Button B pressed!"));
+     }
   }
+  delay(100);*/
+   }
 
 
-   
-
-}        
-// System Initialization function
-void SYS_Init() {
-    SYS.time_stamp = millis();
-    SYS.time_interval = 0.0;
-    SYS.Last_Run = SYS.time_stamp; //  milliseconds since startup
-    SYS.Learnsatus = OFF; // Learn mode off
-    // Initialize system state
-    SYS.State = INIT;
-#ifdef SERIAL_DEBUG
-//debugging via Serial Monitor via usb port
-Serial.begin(9600);
-Serial.println("System Initializing...");
-    // Additional setup code can be added here
-#endif
-}   
-
-// End of Main.cpp
