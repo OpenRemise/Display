@@ -5,7 +5,7 @@
 // Protokoll.h contain definition of  data with in the Protokoll 
 #include "stdint.h"
 #include <Arduino.h>
-//#include "ArduinoJson.h"  // JSON handling library
+#include "ArduinoJson.h"  // JSON handling library see https://arduinojson.org/v7
 #include "eeprom.h"   // EEPROM handling
 //#include "flash.h"  // Flash handling
 
@@ -46,12 +46,14 @@ struct Protokoll {
 
 class OpenRemiseProtokoll
 {
+//Konstruktor und Destruktor
+
 
 public:
 int8_t StartLearnMode();
 int8_t StopLearnMode();    
 int8_t GetJSONdata(const char* JSONString);
-int8_t SendProtokollMessage(const char &message);
+int8_t SendProtokollMessage(const Protokoll& message) ;
 int8_t begin();
 int8_t update(const char* JSONString);
 
