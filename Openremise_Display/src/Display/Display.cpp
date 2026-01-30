@@ -69,7 +69,7 @@ void OpenRemiseDisplay::ShowWelcome() {
 
     u8g2.firstPage();
     do {
-        u8g2.drawXBMP (10, 20, 100, 32, openeremise_logo_100_32); // Display logo at (5,115)
+        u8g2.drawXBMP (10, 20, 103, 21, openeremise_logo_103_21); // Display logo at (5,115)
         u8g2.drawFrame(0,0,128,128);
         u8g2.setFont(u8g2_font_helvR08_tf);
 
