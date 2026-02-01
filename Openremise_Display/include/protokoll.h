@@ -1,20 +1,10 @@
-
-
 #pragma once
 
-// Protokoll.h contain definition of  data with in the Protokoll 
+// protokoll.h contain definition of  data with in the Protokoll 
 #include "stdint.h"
 #include <Arduino.h>
-#include "ArduinoJson.h"  // JSON handling library see https://arduinojson.org/v7
-#include "eeprom.h"   // EEPROM handling
-//#include "flash.h"  // Flash handling
-
-
-// old School type definition
-struct Protokoll {
-    int id;               // Unique identifier for the protocol message
-    uint8_t Data[8];      // Data payload
-};  
+#include <ArduinoJson.h> // JSON handling library see https://arduinojson.org/v7
+// Define Protokoll related constants
 
 // Command codes
 #define ALIVE 0x07              // Keep-alive signal       1 byte of data
@@ -44,18 +34,22 @@ struct Protokoll {
 #define JSON_DISPLAY_TEXT "display_text" // start / stop Text to be shown on the display True / false 
 // More JSON elements can be added as needed
 
-class OpenRemiseProtokoll
-{
-//Konstruktor und Destruktor
-
+class OpenRemiseProtokoll {
 
 public:
-int8_t StartLearnMode();
-int8_t StopLearnMode();    
-int8_t GetJSONdata(const char* JSONString);
-int8_t SendProtokollMessage(const Protokoll& message) ;
+// Constructor
+ explicit OpenRemiseProtokoll(Stream& transport);
+
 int8_t begin();
-int8_t update(const char* JSONString);
+int8_t update();
+
+int8_t parseJson(const char* json_buffer) ;
+
+// int8_t GetJSONdata(const char* JSONString);
+// int8_t SendProtokollMessage(const Protokoll_data& message) ;
+
+int8_t StartLearnMode();
+int8_t StopLearnMode();  
 
 private:
     // Private member variables and functions for Protokoll management
@@ -63,10 +57,18 @@ private:
     //flash section 
     //eeprom section
     //runtime variables
-    bool learn_mode_active;
+    Stream* _transport; // Transport stream (e.g., Serial)
+
+
     // buffer for incoming JSON data
-    char json_buffer[256];
-    char learn_value[64][16]; // buffer for learn values
+    char json_buffer[358]; // adjust size as needed
+    
+
+     // Learn mode 
+    bool learn_mode_active; // flag to indicate if learn mode is active
+    // schar learn_names[64][16]; // buffer for learn names
+    // char learn_value[64][16]; // buffer for learn values
+  
 
 
 };
