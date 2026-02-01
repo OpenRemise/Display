@@ -4,6 +4,8 @@
 Buttons::Buttons() {
     // Initialization code for Buttons class
     // Set up initial states, configure member variables, etc.
+    Button = NO_BUTTONS;
+
 }
 
 /// @brief 
