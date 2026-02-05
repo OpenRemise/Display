@@ -15,9 +15,9 @@
 #define INIT 0
 #define RUN 1   
 
-#define SERIAL_DEBUG // Enable Serial debugging
+//#define SERIAL_DEBUG // Enable Serial debugging
 #define Feedback_LED_PIN 13 // Pin for Feedback LED
-
+#define SLEEP_TIMEOUT 30000 // Time in milliseconds before entering sleep mode
 
 // Pin usage definitions
 
@@ -53,6 +53,7 @@ enum Mode {
     MODE_LEARN,
     MODE_NORMAL,
     MODE_NETWORK,
+    MODE_SLEEP,
     MODE_ERROR =0xFF
 };  
 

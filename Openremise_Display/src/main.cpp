@@ -48,8 +48,8 @@ Debug_port.begin(9600);
         // Show welcome screen
        display.Set_Current_Screen(display.SCREEN_WELCOME);
        //  not blink with button LEDS 
-      buttons.SetLED(BUTTON_A, true);
-      buttons.SetLED(BUTTON_B, true);
+      buttons.SetLED(BUTTON_A, false);
+      buttons.SetLED(BUTTON_B, false);
       }
       else {
        // Blink both LEDs to indicate error
@@ -77,22 +77,21 @@ OpenRemiseProtokoll proto(Serial);
 while(millis() < waittime + 5000); // Wait for 5 seconds
 display.Set_Current_Screen(display.SCREEN_MAIN) ;
 //Initend
-buttons.SetLED(BUTTON_B, false);
-buttons.SetLED(BUTTON_A, false);
+buttons.SetLED(BUTTON_B, true);
+buttons.SetLED(BUTTON_A, true);
 // Set initial screen to normal mode
 
 }
 
 void loop() {
   uint8_t ret_value ;
+  bool sleep_triggered = false; // Flag to track if sleep mode has been triggered
   // Main loop
 
 
   unsigned long wait_time = millis();
-
+ 
   //get  the input from enviroment
-  // Update button states
-
   // update Protokoll module
   //protokoll.update(&jason_buffer);
   ret_value = buttons.update();
@@ -103,11 +102,13 @@ void loop() {
   if (buttons.read() & mask_Button_A) {
       display.Set_Current_Screen(display.SCREEN_MAIN) ;
       SYS.State = MODE_NORMAL;
+     
   }
   // Check for button B press to show network info
   if (buttons.read() & mask_Button_B) {
       display.Set_Current_Screen(display.SCREEN_NETWORK) ;
       SYS.State = MODE_NETWORK;
+ 
   }
  if(buttons.read() >= RESET_REQUEST) {
     // both buttons held for reset request
@@ -115,20 +116,60 @@ void loop() {
     SYS.Error_Code = ERROR_BUTTONS; // Clear error code on reset
     // Additional reset logic as needed
  }
+ if( buttons.read() != NO_BUTTONS)
+    {
+      SYS.Last_Run = millis() ; // Update last run time 
+      sleep_triggered = false; // Reset sleep mode flag on activity
+    }
+if( millis() - SYS.Last_Run >= SLEEP_TIMEOUT) { // Check for inactivity (10 seconds)
+    sleep_triggered = true; // Set sleep mode flag
+    SYS.State = MODE_SLEEP; // Update system state to sleep
+    // Additional sleep mode logic as needed
+    }
+
+    // set led status based on Screens and sleep mode
+if (sleep_triggered == false) {
+    switch (display.get_Current_Screen() ) {
+    case display.SCREEN_MAIN:
+        // LED for main screen
+      buttons.SetLED(BUTTON_A, true);
+      buttons.SetLED(BUTTON_B, false);
+      
+        break;
+    case display.SCREEN_NETWORK:
+        // LED for network screen
+      buttons.SetLED(BUTTON_A, false);
+      buttons.SetLED(BUTTON_B, true);
+        break;
+    case display.SCREEN_ERROR:
+        // LED for error screen
+      buttons.SetLED(BUTTON_A, false);
+      buttons.SetLED(BUTTON_B, false);
+        break;
+    default:
+        break;}
+}
+else
+{
+    // Sleep mode triggered, turn off all LEDs
+      buttons.SetLED(BUTTON_A, true);
+      buttons.SetLED(BUTTON_B, true);
+      }
+
 
 // Dominant Event is error state  
 
  if (SYS.State == MODE_ERROR) {
   display.Set_Current_Screen(display.SCREEN_ERROR) ;
   display.set_error_code(SYS.Error_Code);
-  
+
  }
   // Reakt on system state changes
 
   // Update the display content
   display.update();
 
-while(millis() < wait_time + 10);// wait for 1 sec
+while(millis() < wait_time + 10);// wait for 10 ms before next loop iteration to avoid excessive CPU usage
 
    }
 
