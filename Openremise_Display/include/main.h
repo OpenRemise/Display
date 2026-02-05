@@ -18,15 +18,26 @@
 #define SERIAL_DEBUG // Enable Serial debugging
 #define Feedback_LED_PIN 13 // Pin for Feedback LED
 
+
+// Pin usage definitions
+
 //Button definition 
-#define BUTTON_A_PIN 2
-#define BUTTON_B_PIN 3
-#define LED_A_PIN 4
-#define LED_B_PIN 5
+#define BUTTON_A_PIN 4
+#define LED_A_PIN 5
+#define BUTTON_B_PIN 6
+#define LED_B_PIN 7
 
 // SoftSerial pins for Protokoll communication
 #define PROTOKOLL_RX_PIN 10
 #define PROTOKOLL_TX_PIN 11
+/* I2C  Just for reference if needed
+#define I2C_SDA_PIN A4
+#define I2C_SCL_PIN A5  
+*/
+
+
+
+// System state structure
 
 struct SYS_
 {
@@ -50,6 +61,8 @@ enum ErrorCodes {
     ERROR_DISPLAY,
     ERROR_BUTTONS,
     ERROR_PROTOKOLL,
+    ERROR_UNKNOWN = 0xFF
+
     // Add more error codes as needed
 };
 
