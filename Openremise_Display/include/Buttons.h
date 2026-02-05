@@ -11,9 +11,15 @@
 #define BUTTON_A_HOLD     0x20
 #define BUTTON_B_HOLD     0x02
 #define NO_BUTTONS        0x00
+#define mask_Button_A    0xF0
+#define mask_Button_B    0x0F 
+#define mask_out_Button_A      0x0F
+#define mask_out_Button_B      0xF0  
+
 #define BUTTON_A          0x00 //Index for Button A
 #define BUTTON_B          0x01 //Index for Button B
-#define RESET_REQUEST     0xFF
+#define RESET_REQUEST     0xEE
+#define BUTTON_FAIL       0xFF   
 
 // Define the Buttons class
 class Buttons {
@@ -33,7 +39,7 @@ private:
     unsigned long Timer[2] = {0, 0}; // Timer for button A and B
     bool     TimerStart[2] = {0, 0}; // Start time for button A and B
 
-    unsigned long HoldTime = 1000; // milliseconds
+    unsigned long HoldTime = 500; // milliseconds
     unsigned long ResetTime = 5000;// milliseconds
 
     bool Button_A_Hold = false;
@@ -42,7 +48,7 @@ private:
     uint8_t pinB;
     uint8_t ledA;
     uint8_t ledB;
-    uint8_t Button = NO_BUTTONS;
+    uint8_t Button_state = NO_BUTTONS;
 
 };
 
