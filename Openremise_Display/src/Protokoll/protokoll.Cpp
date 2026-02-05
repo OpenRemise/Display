@@ -44,11 +44,11 @@ int8_t OpenRemiseProtokoll::update()
             // detect json element with eeprom Stored names 
             // detect json element with flash Stored names
             // update runtime variables accordingly
-
+/*
     static uint8_t idx = 0;
 
     while (_transport->available()) {
-        char c = _transport->read();
+       // char c = _transport->read();
 
         if (c == '\n') {
             json_buffer[idx] = '\0';
@@ -64,7 +64,7 @@ int8_t OpenRemiseProtokoll::update()
             json_buffer[idx++] = c;
         }
     }
-
+*/
 
 return 0;
 }
@@ -77,14 +77,14 @@ int8_t OpenRemiseProtokoll::parseJson(const char* json_buffer) {
     // Extract relevant information and store in data structures
     // Return 0 on success, error code otherwise
 
-StaticJsonDocument<356> doc;
+//StaticJsonDocument<356> doc;
 
-deserializeJson(doc, _transport);
+//deserializeJson(doc, _transport);
 // Example: Extracting values from JSON
-const char* id = doc[JSON_ID]; // "id" element 
-const char* ip = doc[JSON_IP]; // "ip" element
-const int status = doc[JSON_STATUS]; // "status" element
-const char* service = doc[JSON_Service]; // "service" element
+//const char* id = doc[JSON_ID]; // "id" element 
+//const char* ip = doc[JSON_IP]; // "ip" element
+//const int status = doc[JSON_STATUS]; // "status" element
+//const char* service = doc[JSON_Service]; // "service" element
     //....
 // Further processing of extracted data
 
