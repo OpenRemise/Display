@@ -30,9 +30,10 @@ uint8_t Buttons::begin(int Pin_a, int LED_a, int Pin_b, int LED_b)
     pinMode(LED_a, OUTPUT);
     pinMode(Pin_b, INPUT);
     pinMode(LED_b, OUTPUT);
-    digitalWrite(LED_a, HIGH);
-    digitalWrite(LED_b, HIGH);
-   Button_state = NO_BUTTONS;
+ // Ensure LEDs are off at start
+    digitalWrite(LED_a, LED_OFF);
+    digitalWrite(LED_b, LED_OFF);
+    Button_state = NO_BUTTONS;
 // Initialize member variables 
  // timers 
     TimerStart[BUTTON_A] = false;
@@ -40,14 +41,12 @@ uint8_t Buttons::begin(int Pin_a, int LED_a, int Pin_b, int LED_b)
     Timer[BUTTON_A] = 0; // Timer for button A
     Timer[BUTTON_B] = 0; // Timer for button B
 
-    HoldTime = 500; // milliseconds
-    ResetTime = 5000;// milliseconds
+    HoldTime = BUTTON_HOLD_TIME; // milliseconds
+    ResetTime = BUTTON_RESET_TIME;// milliseconds
  // button hold states
     Button_A_Hold = false;
     Button_B_Hold = false;
- // Ensure LEDs are off at start
-    digitalWrite(LED_a, HIGH);
-    digitalWrite(LED_b, HIGH);
+
 
     return (true);
 }
@@ -137,8 +136,7 @@ uint8_t Buttons::update() {
     
 
 
-    digitalWrite(ledA, Button_A_Hold); // light LED when button pressed
-    digitalWrite(ledB, Button_B_Hold); // light LED when button pressed 
+
 
 
     // detect edge  and start hold timer

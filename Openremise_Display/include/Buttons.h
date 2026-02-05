@@ -21,6 +21,14 @@
 #define RESET_REQUEST     0xEE
 #define BUTTON_FAIL       0xFF   
 
+// LED state defines active LOW
+#define LED_ON           LOW
+#define LED_OFF          HIGH
+#define Button_DEBOUNCE_TIME 50 // milliseconds
+#define BUTTON_HOLD_TIME    500 // milliseconds
+#define BUTTON_RESET_TIME   5000 // milliseconds
+
+
 // Define the Buttons class
 class Buttons {
 public:
