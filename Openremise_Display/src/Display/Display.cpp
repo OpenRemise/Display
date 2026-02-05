@@ -29,7 +29,8 @@ uint8_t OpenRemiseDisplay::begin() {
         Serial.println(F("OpenRemiseDisplay: INIT ERROR!"));
         return 0xFF; // Fehler
     }
-  Set_Current_Screen(SCREEN_WELCOME);
+
+  Set_Current_Screen(SCREEN_INVALID);// set to last screen to force update
   initialized_display = true;
   Serial.println(F("OpenRemiseDisplay: INIT OK"));
 
@@ -58,6 +59,9 @@ uint8_t OpenRemiseDisplay::update() {
             break;
         case SCREEN_ERROR:
             ShowError();
+            break;
+        case SCREEN_NETWORK:
+            ShowNetwork();
             break;
         default:
             break;
@@ -275,10 +279,16 @@ void OpenRemiseDisplay::ShowNetwork() {
 
 void OpenRemiseDisplay::Set_Current_Screen(uint8_t screen_id) { 
     if (screen_id < NUM_SCREENS) {
+       if (static_cast<ScreenId>(screen_id) == current_screen) {
+            return; // No change needed
+        }   
         current_screen = static_cast<ScreenId>(screen_id);
         update_screen = true; // Mark screen for update
     }
 }
+uint8_t OpenRemiseDisplay::get_Current_Screen()  {
+    return static_cast<uint8_t>(current_screen);
+}   
 
 void OpenRemiseDisplay::set_error_code(uint8_t error_code) {
     // Code to set the error code and update the display accordingly

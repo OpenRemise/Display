@@ -26,6 +26,7 @@ class OpenRemiseDisplay {
 
     void ShowLearnMode();
     void Set_Current_Screen(uint8_t screen_id);
+    uint8_t get_Current_Screen() ;
     void set_error_code(uint8_t error_code) ;
 
 //Types 
@@ -36,6 +37,7 @@ class OpenRemiseDisplay {
     SCREEN_ERROR,
     SCREEN_LEARN,
     // Add more screens as needed
+    SCREEN_INVALID,
     NUM_SCREENS
 };
       
