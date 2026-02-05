@@ -2,9 +2,18 @@
 
 #include <Arduino.h>
 #include <stdio.h>
-#include <U8g2lib.h>
-#include <Wire.h>
+#include <U8g2lib.h>// Include the U8g2 library for display handling
+#include <Wire.h> // Include Wire library for I2C communication
 #include "Logo.h" // Include logo bitmaps
+
+// Define for the OpenRemiseDisplay 
+// define  for I2C Scanner
+
+//#define I2C_SCANNER
+//SCREEN DEFINES
+#define SCREEN_Title_x 75
+#define SCREEN_Title_y 30
+#define BLINKTIME 500 // Blinkzeit in Millisekunden
 
 // Define the OpenRemiseDisplay class
 class OpenRemiseDisplay {
