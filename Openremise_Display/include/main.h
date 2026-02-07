@@ -62,8 +62,15 @@ enum ErrorCodes {
     ERROR_DISPLAY,
     ERROR_BUTTONS,
     ERROR_PROTOKOLL,
-    ERROR_UNKNOWN = 0xFF
-
+    ERROR_S3_NO_WIFI,
+    ERROR_S3_SHORTCUT,
+    
     // Add more error codes as needed
-};
+    ERROR_UNKNOWN = 0xFF};
+
+//system funktions 
+  
+
+    
+
 
