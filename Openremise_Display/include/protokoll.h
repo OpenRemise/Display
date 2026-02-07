@@ -34,41 +34,79 @@
 #define JSON_DISPLAY_TEXT "display_text" // start / stop Text to be shown on the display True / false 
 // More JSON elements can be added as needed
 
+
+// Modul defines 
+#define PROTOKOLL_DATA_TIMEOUT 2000
+#define RX_BUFFER_SIZE  30 // may  adapt to a better value
+
+
+enum Protokoll_Data_error_t{
+NO_Data,
+ Data_Ok,
+ Data_Valid,
+
+// add_as needed
+ Data_Timeout =0XFB,
+ Data_Parse_Error =0xFC,
+ Data_Unknown_Field=0xFD,
+ Data_Unknown =0xFE,
+ Data_Error =0xFF
+};
+// Define Class  
+
 class OpenRemiseProtokoll {
 
 public:
 // Constructor
- explicit OpenRemiseProtokoll(Stream& transport);
+ OpenRemiseProtokoll();
 
-int8_t begin();
+
+// int8_t GetJSONdata(const char* JSONString);
+// int8_t SendProtokollMessage(const Protokoll_data& message) ;
+//Functions
+
+uint8_t begin( Stream& transport);
+
 int8_t update();
 
 int8_t parseJson(const char* json_buffer) ;
 
-// int8_t GetJSONdata(const char* JSONString);
-// int8_t SendProtokollMessage(const Protokoll_data& message) ;
+//data 
 
-int8_t StartLearnMode();
-int8_t StopLearnMode();  
+
 
 private:
     // Private member variables and functions for Protokoll management
     // Example: Message buffers, state variables, etc.
-    //flash section 
-    //eeprom section
-    //runtime variables
-    Stream* _transport; // Transport stream (e.g., Serial)
+  struct data_controll_t
+  { bool Data_received;  //s3 daten empangen 
+    bool Data_send;      // daten an S3 gesendet 
+    unsigned long lastDataMillis;
+    const unsigned long DATA_TIMEOUT_MS = PROTOKOLL_DATA_TIMEOUT ;
+    Protokoll_Data_error_t Data_error;  
+  };
+data_controll_t data_controll;
 
+
+
+
+  //runtime variables
+    Stream* _transport = nullptr; // Transport stream (e.g., Serial)
+    //Serial buffer 
+
+    char rxBuffer[RX_BUFFER_SIZE];
+     uint8_t rxIndex; 
+      bool rxComplete;
 
     // buffer for incoming JSON data
-    char json_buffer[358]; // adjust size as needed
-    
+//char json_buffer[358]; // adjust size as needed
+  //JsonDocument<256> doc;
 
-     // Learn mode 
-    bool learn_mode_active; // flag to indicate if learn mode is active
-    // schar learn_names[64][16]; // buffer for learn names
-    // char learn_value[64][16]; // buffer for learn values
-  
+ // Privat functions 
+ Protokoll_Data_error_t Checktimeout();   
+ void poll();
+ void process();
+
 
 
 };

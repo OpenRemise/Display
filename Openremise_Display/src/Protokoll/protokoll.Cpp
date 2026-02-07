@@ -5,14 +5,15 @@
 /// @return     0 on success, error code otherwise
 
 /// @brief 
-OpenRemiseProtokoll::OpenRemiseProtokoll(Stream& transport)
-: _transport(&transport)
+OpenRemiseProtokoll::OpenRemiseProtokoll()
+  : _transport(nullptr),
+    rxIndex(0),
+    rxComplete(false)
 {
-
 }
 
 
-int8_t OpenRemiseProtokoll::begin()
+uint8_t OpenRemiseProtokoll::begin(Stream& transport)
 {
     // Implementation for initializing the Protokoll module
     // Clear Counter for messages, buffers, etc.
@@ -24,51 +25,76 @@ int8_t OpenRemiseProtokoll::begin()
     // read out EEPROM values ( json names only )
     // Read out Flash values ( json names only from learning mode )
     // Sort names in alphbetic order for faster search
-    
-    // Initialize learn mode active flag
-    learn_mode_active = false;
+ _transport = &transport;
+
+  rxIndex = 0;
+  rxComplete = false;
 
 
+    data_controll.Data_send =false;
+    data_controll. Data_received= false;  //s3 daten empangen 
+    data_controll.Data_error = NO_Data;
+    data_controll.lastDataMillis = 0;
+  
     return 0; // Placeholder return value
 }
 
 // Protocoll related functions are implemented here.
 
 int8_t OpenRemiseProtokoll::update()
-{        // Implementation for getting JSON data
-        // get data  from Uart until  ":" or end of stream
-        // Parse JSON string and extract relevant information
-        // Store extracted data in appropriate data structures
-        // Return 0 on success, error code otherwise
-  //https://arduinojson.org/v7/tutorial/deserialization 
-            // detect json element with eeprom Stored names 
-            // detect json element with flash Stored names
-            // update runtime variables accordingly
-/*
-    static uint8_t idx = 0;
+{    // Transfer last data  from Jason to display
+    if (true == data_controll.Data_received ) 
+    { if( Data_Valid == data_controll.Data_error )
+        {
+             // transfer data
+         }
 
-    while (_transport->available()) {
-       // char c = _transport->read();
 
-        if (c == '\n') {
-            json_buffer[idx] = '\0';
-            idx = 0;
-
-            // hier JSON auswerten
-            
-
-            return parseJson(json_buffer);
-        }
-
-        if (idx < sizeof(json_buffer) - 1) {
-            json_buffer[idx++] = c;
-        }
     }
-*/
+
 
 return 0;
 }
 
+void OpenRemiseProtokoll::poll()
+{
+  while (_transport->available()) {
+    char c = _transport->read();
+
+    if (c == '\n') {
+      rxBuffer[rxIndex] = '\0';
+      rxComplete = true;
+      rxIndex = 0;
+      return;
+    }
+
+    if (rxIndex < RX_BUFFER_SIZE - 1) {
+      rxBuffer[rxIndex++] = c;
+    }
+  }
+}
+
+
+void OpenRemiseProtokoll::process()
+{
+  if (!rxComplete) return;
+
+  rxComplete = false;
+
+ 
+ /* DeserializationError err = deserializeJson(doc, rxBuffer);
+
+  if (err) {
+    data_controll.Data_error = Data_Parse_Error;
+   // lastError = Data_InvalidJson;
+    return;
+  }
+
+ // parseJson(doc);*/
+
+  data_controll.lastDataMillis = millis();
+  data_controll.Data_error = Data_Valid;
+}
 
 
 int8_t OpenRemiseProtokoll::parseJson(const char* json_buffer) {
@@ -77,7 +103,6 @@ int8_t OpenRemiseProtokoll::parseJson(const char* json_buffer) {
     // Extract relevant information and store in data structures
     // Return 0 on success, error code otherwise
 
-//StaticJsonDocument<356> doc;
 
 //deserializeJson(doc, _transport);
 // Example: Extracting values from JSON
@@ -95,39 +120,17 @@ int8_t OpenRemiseProtokoll::parseJson(const char* json_buffer) {
 
     } ;
 
-int8_t OpenRemiseProtokoll::StartLearnMode() {
-    // Implementation for starting learn mode
-    // Set system state to learn mode
-    // Initialize learn mode parameters
-        learn_mode_active = true;
-
-        return learn_mode_active; // Placeholder return value
-
-}   
-int8_t OpenRemiseProtokoll::StopLearnMode() {
-        // Implementation for stopping learn mode
-        // Reset system state from learn mode to normal mode
-        learn_mode_active = false;
 
 
-        return learn_mode_active; // Placeholder return value
-    }   
-// this function will be not ussed in the first release
-/*
-int8_t OpenRemiseProtokoll::SendProtokollMessage(const Protokoll& message) {
-          // Implementation for sending Protokoll message
-            // Format message according to Protokoll specifications
-            // Transmit message via appropriate communication interface
-
-
-
-
-
-
-            return 0; // Placeholder return value
-
-    }
-
-*/
+Protokoll_Data_error_t  OpenRemiseProtokoll:: Checktimeout()
+{
+   if (Data_Valid != data_controll.Data_error) {
+    return NO_Data;   // optional, aber elegant
+  }
+if ( millis() - data_controll.lastDataMillis > PROTOKOLL_DATA_TIMEOUT){
+    return Data_Timeout;
+}
+return  Data_Ok;
+}
 
     //end of Protokoll/protokoll.Cpp
