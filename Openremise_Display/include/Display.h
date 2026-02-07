@@ -13,6 +13,8 @@
 //SCREEN DEFINES
 #define SCREEN_Title_x 75
 #define SCREEN_Title_y 30
+#define LOGO_x 6
+#define LOGO_y 5
 #define BLINKTIME 500 // Blinkzeit in Millisekunden
 
 // Define the OpenRemiseDisplay class
@@ -34,9 +36,12 @@ class OpenRemiseDisplay {
     void ShowNetwork();
 
     void ShowLearnMode();
+    
     void Set_Current_Screen(uint8_t screen_id);
     uint8_t get_Current_Screen() ;
-    void set_error_code(uint8_t error_code) ;
+    void set_error_code(uint8_t error_code, const char* error_str = nullptr);
+    void set_info_string( const char* info);
+    void force_update();
 
 //Types 
     enum ScreenId {
@@ -61,21 +66,25 @@ struct ScreenDescriptor {
     U8G2_SH1107_SEEED_128X128_1_HW_I2C u8g2;
     bool initialized_display;
     bool update_screen;
-   
+    
     bool BLink_STATE;
     uint32_t last_blink_time;
 
     ScreenId current_screen;
 
     const ScreenDescriptor screens[NUM_SCREENS] =  {
+     {SCREEN_INVALID, false}, // Default screen, not used but placeholder for index 0
     {SCREEN_WELCOME, false},
     {SCREEN_MAIN, false},
-    {SCREEN_ERROR, true},     // nur der Fehler-Screen blinkt
+    {SCREEN_ERROR, true},     //Fehler-Screen blinkt
     {SCREEN_NETWORK, false },
-    {SCREEN_LEARN, true }
+    {SCREEN_LEARN, true }// Lernmodus blinkt
     };
+    
 
    uint8_t Display_error_code;
+   const char* Display_error_string;
+   const char* Display_info_string = nullptr;
 
 /// @brief Toggle the blink state
 

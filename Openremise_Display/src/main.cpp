@@ -5,7 +5,7 @@ OpenRemiseDisplay display;
 // buttons for up and down 
 Buttons buttons;
 // Protokoll instance
-OpenRemiseProtokoll protokoll(Serial); // Protokoll  kommunikation über HW Uart
+OpenRemiseProtokoll protokoll; // Protokoll  kommunikation über HW Uart
 
 
 // software serial for debug output
@@ -19,6 +19,7 @@ unsigned long waittime;
   SYS.State = MODE_INIT;
   SYS.Error_Code = ERROR_NONE; // Set error code to none initially
 Serial.begin(115200);
+protokoll.begin(Serial);
 #ifdef SERIAL_DEBUG
 Debug_port.begin(9600);
 
@@ -63,14 +64,9 @@ Debug_port.begin(9600);
         }
      }
 // Protkoll initialisieren
-protokoll.begin();
+
 //Wait  for S3 sending json data on HW Uart mit 115200 Baud
 
-#ifdef SERIAL_DEBUG
-OpenRemiseProtokoll proto(Debug_port);
-#else
-OpenRemiseProtokoll proto(Serial);
-#endif
 // wait for data for 5 sec 
  waittime = millis();
    display.update();
@@ -84,7 +80,7 @@ buttons.SetLED(BUTTON_A, true);
 }
 
 void loop() {
-  uint8_t ret_value ;
+ 
   bool sleep_triggered = false; // Flag to track if sleep mode has been triggered
   // Main loop
 
@@ -94,7 +90,7 @@ void loop() {
   //get  the input from enviroment
   // update Protokoll module
   //protokoll.update(&jason_buffer);
-  ret_value = buttons.update();
+  buttons.update(); // return also button state !!!
   // figure out  the system reaktions
 
     // check events for display update
@@ -112,10 +108,13 @@ void loop() {
   }
  if(buttons.read() >= RESET_REQUEST) {
     // both buttons held for reset request
+   
     SYS.State = MODE_ERROR;
-    SYS.Error_Code = ERROR_BUTTONS; // Clear error code on reset
+    SYS.Error_Code = ERROR_PROTOKOLL; // Clear error code on reset
     // Additional reset logic as needed
- }
+    SYS.Last_Run = millis(); // Update last run time to prevent immediate re-triggering of sleep mode
+    }
+ 
  if( buttons.read() != NO_BUTTONS)
     {
       SYS.Last_Run = millis() ; // Update last run time 
@@ -132,19 +131,19 @@ if (sleep_triggered == false) {
     switch (display.get_Current_Screen() ) {
     case display.SCREEN_MAIN:
         // LED for main screen
-      buttons.SetLED(BUTTON_A, true);
-      buttons.SetLED(BUTTON_B, false);
+      buttons.SetLED(BUTTON_A, LED_OFF);
+      buttons.SetLED(BUTTON_B, LED_ON);
       
         break;
     case display.SCREEN_NETWORK:
         // LED for network screen
-      buttons.SetLED(BUTTON_A, false);
-      buttons.SetLED(BUTTON_B, true);
+      buttons.SetLED(BUTTON_A, LED_ON);
+      buttons.SetLED(BUTTON_B, LED_OFF);
         break;
     case display.SCREEN_ERROR:
         // LED for error screen
-      buttons.SetLED(BUTTON_A, false);
-      buttons.SetLED(BUTTON_B, false);
+      buttons.SetLED(BUTTON_A, LED_ON);
+      buttons.SetLED(BUTTON_B, LED_ON);
         break;
     default:
         break;}
@@ -152,22 +151,37 @@ if (sleep_triggered == false) {
 else
 {
     // Sleep mode triggered, turn off all LEDs
-      buttons.SetLED(BUTTON_A, true);
-      buttons.SetLED(BUTTON_B, true);
+      buttons.SetLED(BUTTON_A, LED_OFF);
+      buttons.SetLED(BUTTON_B, LED_OFF);
       }
 
 
 // Dominant Event is error state  
 
- if (SYS.State == MODE_ERROR) {
-  display.Set_Current_Screen(display.SCREEN_ERROR) ;
-  display.set_error_code(SYS.Error_Code);
+ if (SYS.Error_Code != ERROR_NONE) {
+  if (millis() - SYS.Last_Run > 5000) { // If 5 seconds have passed since error occurred
+    SYS.Error_Code = ERROR_NONE; // Clear error code after displaying for 5 seconds
+    display.set_error_code(SYS.Error_Code); // Update display to clear error message
+    display.Set_Current_Screen(display.SCREEN_MAIN);
+    }
+    else
+    {
+    display.Set_Current_Screen(display.SCREEN_ERROR) ;
+    display.force_update(); // Force update to show error screen immediately
+    display.set_error_code(SYS.Error_Code, "KOM ERROR!"); // Set error code and message for display
 
+    }
+
+
+ //reste error code after displaying
+ 
  }
+
   // Reakt on system state changes
 
   // Update the display content
   display.update();
+ 
 
 while(millis() < wait_time + 10);// wait for 10 ms before next loop iteration to avoid excessive CPU usage
 

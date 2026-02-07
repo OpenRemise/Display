@@ -38,7 +38,10 @@ uint8_t OpenRemiseDisplay::begin() {
   last_blink_time = 0;
 
   Serial.println(F("OpenRemiseDisplay: INIT OK"));
-
+// Strings default values 
+Display_error_code =0;
+Display_info_string = " no info" ;
+Display_error_string = "No information";
 
     return 0x00; // alles OK
 } 
@@ -52,7 +55,7 @@ uint8_t OpenRemiseDisplay::update() {
     // Example: Redraw UI elements, refresh screen, etc.
     // Update display content based on current state 
     // blink takt generieren 
-
+toggleBlinkState(); // manage blink state
 // update screen if needed triggered by state change or blink state or button press
  if (update_screen) {
     switch (current_screen) {
@@ -72,10 +75,10 @@ uint8_t OpenRemiseDisplay::update() {
             break;
     }
     update_screen = false; // Reset update flag after updating
-
+ digitalWrite(LED_BUILTIN, update_screen ? HIGH : LOW); // Toggle built-in LED for visual feedback
     
 }
-toggleBlinkState(); // manage blink state
+
 
 return (0) ;
 
@@ -102,17 +105,11 @@ void OpenRemiseDisplay::ShowWelcome() {
     const char* line4 = "Wait for data...";
     u8g2.firstPage();
     do {
-        
-                // frame im takt blinken lassen 
-        if (BLink_STATE && screens[current_screen].blink) {
-            u8g2.setDrawColor(2); // XOR mode for blinking
-        } else {                                
-            u8g2.setDrawColor(1); // Normal mode
-        }
+
         // Frame zeichnen
         u8g2.drawFrame(0,0,128,128);
          u8g2.setDrawColor(1); // Normal mode for rest
-        u8g2.drawXBMP (10, 20, 103, 21, openeremise_logo_103_21); // Display logo at (5,115)
+        u8g2.drawXBMP ((LOGO_x+5), (LOGO_y+5), 103, 21, openeremise_logo_103_21); // Display logo at (5,115)
         u8g2.setFont(u8g2_font_helvR08_tf);
 
         // Horizontales zentrieren
@@ -161,7 +158,7 @@ void OpenRemiseDisplay::ShowNormalMode() {
         // Frame zeichnen
         u8g2.drawFrame(0,0,128,128);
             u8g2.setDrawColor(1); // rest text nur normal zeichnen
-        u8g2.drawXBMP (3, 5, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
         u8g2.setFont(u8g2_font_helvR08_tf);
         //Static Text 
         // Horizontales zentrieren
@@ -188,44 +185,51 @@ void OpenRemiseDisplay::ShowError() {
     // Show error message on the display
     // Example: Display "Error" text, show error icon, etc.
     // Display error message on the screen
-    const char* Title = ("Error");
-    const char* codeline  =  "32 ";
-    const char* line2 = "What   happened? ";    
-    const char* line3 = " ";
-    const char* line4 = "   "; // pointer on Strings to be replaced with actual error descriptions 
-    u8g2.firstPage();
-    do {
-        // frame im takt blinken lassen 
-        if (BLink_STATE && screens[current_screen].blink) {
-            u8g2.setDrawColor(2); // XOR mode for blinking
-       
-        } else {                                
-            u8g2.setDrawColor(1); // Normal mode
-     
-        }
-      
-        // Frame zeichnen        
-        u8g2.drawFrame(0,0,128,128);
-        u8g2.setDrawColor(1); // Normal mode for rest
+    
 
-        u8g2.drawXBMP (3, 5, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+    u8g2.firstPage();
+    do { 
+        
+        if(BLink_STATE && screens[current_screen].blink) {
+                   //FRAME zeichnen
+          u8g2.setDrawColor(1); // Normal mode
+          for(int i=0; i<5; i+=2) {
+                u8g2.drawFrame(i, i, 128 - 2*i, 128 - 2*i); // Draw the inner frame
+                // LOGO zeichnen        
+        u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); // Display small logo at (5,115)
+            }
+        } else {                                
+          u8g2.drawFrame(0,0,128,128); // Draw the outer frame only when not blinking
+          // LOGO zeichnen        
+        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+        }
+
+
+   
+        
       
         u8g2.setFont(u8g2_font_helvR08_tf);
         //Static Text 
         // Horizontales zentrieren
         int16_t x1 = (8); // Fixed position for title
-        int16_t x2 = (50); // Fixed position for labels
+        //int16_t x2 = (50); // Fixed position for labels
+        
+        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, "Error!"); // Title for error screen
+ 
+            // error details anzeigen
+       u8g2.setCursor(84, 45);
+       u8g2.print(Display_error_code);   // Vom System erzeugt error code anzeigen, z.B. 32 = Communication error, 64 = Sensor failure, etc.  
+       u8g2.drawStr(x1, 80,"What happened?"); // Label for error code         
+       u8g2.drawStr(x1, 93, Display_error_string); // Display error string if available
 
-        // Y-Koordinaten
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, Title);
-        u8g2.drawStr(84, 40, codeline);
-        u8g2.drawStr(x1, 78, line2);
-        u8g2.drawStr(x1, 93, line3);
-        u8g2.drawStr(x1, 108, line4);
+        
+        if (Display_info_string != nullptr)
+        {
+        u8g2.drawStr(x1, 108, Display_info_string);
+        }
         //Data Platzhalter
    
-        u8g2.drawStr(x2, 93,  "Data lost");
-        u8g2.drawStr(x2, 108, "Kom error");
+
     } while (u8g2.nextPage());
 
 
@@ -255,7 +259,7 @@ void OpenRemiseDisplay::ShowNetwork() {
         
         u8g2.setDrawColor(1); // Normal mode for rest
         
-        u8g2.drawXBMP (3, 5, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
         u8g2.setFont(u8g2_font_helvR08_tf);
         //Static Text 
         // Horizontales zentrieren
@@ -293,22 +297,37 @@ void OpenRemiseDisplay::Set_Current_Screen(uint8_t screen_id) {
     }
 }
 
-
+void OpenRemiseDisplay::force_update() {
+    update_screen = true; // Mark screen for update
+}   
 
 uint8_t OpenRemiseDisplay::get_Current_Screen()  {
     return static_cast<uint8_t>(current_screen);
 }   
 
 
-void OpenRemiseDisplay::set_error_code(uint8_t error_code) {
+void OpenRemiseDisplay::set_error_code(uint8_t error_code, const char* error_str) {
     // Code to set the error code and update the display accordingly
     // Update display based on the provided error code
     // Example: Show specific error messages or indicators
     // Update display content based on error code
     // This is a placeholder implementation; actual implementation may vary
+    // If error_str is provided, store it for display purposes
     Display_error_code = error_code;
+    if (error_str != nullptr) {
+        // Store error_str in a member variable or buffer for later display
+        // Example: store in a static buffer or member variable
+        // For now, we just store the error code
+        Display_error_string = error_str;
+    }
 }
 
+
+void OpenRemiseDisplay::set_info_string( const char* info){
+   if (info != nullptr)
+   { Display_info_string = info;}
+
+}
 
 
 void OpenRemiseDisplay::toggleBlinkState() {
@@ -319,11 +338,9 @@ void OpenRemiseDisplay::toggleBlinkState() {
         BLink_STATE = !BLink_STATE;
             if (screens[current_screen].blink) {
                     update_screen = true; 
-                     Serial.println(BLink_STATE);// debug print
+        
+            }           
         }  
      } 
-     // Mark screen for update if it has blinking elements  
-
-                 
-}
+      
 // End of Display.cpp
