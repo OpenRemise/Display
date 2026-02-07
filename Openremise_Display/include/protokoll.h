@@ -52,6 +52,21 @@ NO_Data,
  Data_Unknown =0xFE,
  Data_Error =0xFF
 };
+
+// Data from Stream 
+struct Data_from_Stream_t  {
+  char ip[16];
+  char state[12];
+  int rssi;
+ // Add as needed 
+  float voltage;
+  float current; 
+  bool  track_state;
+
+
+ bool valid;
+}; 
+Data_from_Stream_t Data_from_Stream;
 // Define Class  
 
 class OpenRemiseProtokoll {
@@ -60,16 +75,13 @@ public:
 // Constructor
  OpenRemiseProtokoll();
 
-
-// int8_t GetJSONdata(const char* JSONString);
 // int8_t SendProtokollMessage(const Protokoll_data& message) ;
 //Functions
 
 uint8_t begin( Stream& transport);
-
 int8_t update();
-
-int8_t parseJson(const char* json_buffer) ;
+const Data_from_Stream_t& getDatafromStream() const;
+Protokoll_Data_error_t Get_Protokoll_Error ();
 
 //data 
 
@@ -78,6 +90,7 @@ int8_t parseJson(const char* json_buffer) ;
 private:
     // Private member variables and functions for Protokoll management
     // Example: Message buffers, state variables, etc.
+
   struct data_controll_t
   { bool Data_received;  //s3 daten empangen 
     bool Data_send;      // daten an S3 gesendet 
@@ -87,9 +100,6 @@ private:
   };
 data_controll_t data_controll;
 
-
-
-
   //runtime variables
     Stream* _transport = nullptr; // Transport stream (e.g., Serial)
     //Serial buffer 
@@ -98,16 +108,14 @@ data_controll_t data_controll;
      uint8_t rxIndex; 
       bool rxComplete;
 
-    // buffer for incoming JSON data
+// buffer for incoming JSON data
 //char json_buffer[358]; // adjust size as needed
-  //JsonDocument<256> doc;
+StaticJsonDocument<256> doc ;
 
  // Privat functions 
- Protokoll_Data_error_t Checktimeout();   
+ Protokoll_Data_error_t Checktimeout();  
  void poll();
  void process();
-
-
 
 };
 

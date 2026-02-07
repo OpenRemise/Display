@@ -7,8 +7,7 @@
 /// @brief 
 OpenRemiseProtokoll::OpenRemiseProtokoll()
   : _transport(nullptr),
-    rxIndex(0),
-    rxComplete(false)
+    rxIndex(0)
 {
 }
 
@@ -27,12 +26,10 @@ uint8_t OpenRemiseProtokoll::begin(Stream& transport)
     // Sort names in alphbetic order for faster search
  _transport = &transport;
 
-  rxIndex = 0;
-  rxComplete = false;
-
-
+    rxIndex = 0;
+ 
     data_controll.Data_send =false;
-    data_controll. Data_received= false;  //s3 daten empangen 
+    data_controll.Data_received= false;  //s3 daten empangen 
     data_controll.Data_error = NO_Data;
     data_controll.lastDataMillis = 0;
   
@@ -42,20 +39,23 @@ uint8_t OpenRemiseProtokoll::begin(Stream& transport)
 // Protocoll related functions are implemented here.
 
 int8_t OpenRemiseProtokoll::update()
-{    // Transfer last data  from Jason to display
-    if (true == data_controll.Data_received ) 
-    { if( Data_Valid == data_controll.Data_error )
-        {
-             // transfer data
-         }
+{ poll();     // Bytes einsammeln
+  process();  // falls kompletter Datensatz → parsen
 
+  // Timeout überwachen
+  if (Checktimeout() == Data_Timeout) {
+   data_controll.Data_error = Data_Timeout;
+    return Data_Timeout;
+  }
 
-    }
-
-
-return 0;
+  return Data_Ok;
 }
 
+Protokoll_Data_error_t OpenRemiseProtokoll::Get_Protokoll_Error (){
+  return data_controll.Data_error;
+};
+
+// collect data 
 void OpenRemiseProtokoll::poll()
 {
   while (_transport->available()) {
@@ -63,7 +63,7 @@ void OpenRemiseProtokoll::poll()
 
     if (c == '\n') {
       rxBuffer[rxIndex] = '\0';
-      rxComplete = true;
+      data_controll. Data_received = true;
       rxIndex = 0;
       return;
     }
@@ -77,48 +77,39 @@ void OpenRemiseProtokoll::poll()
 
 void OpenRemiseProtokoll::process()
 {
-  if (!rxComplete) return;
+  if (!data_controll.Data_received) return;
+  data_controll. Data_received= false;
 
-  rxComplete = false;
-
- 
- /* DeserializationError err = deserializeJson(doc, rxBuffer);
-
+  DeserializationError err = deserializeJson(doc, rxBuffer);
   if (err) {
     data_controll.Data_error = Data_Parse_Error;
-   // lastError = Data_InvalidJson;
     return;
   }
 
- // parseJson(doc);*/
+  // Nur Felder lesen, die du brauchst
+  if (doc.containsKey(JSON_STATUS)) {
+    strlcpy(Data_from_Stream.state,
+            doc[JSON_STATUS],
+            sizeof(Data_from_Stream.state));
+  }
+
+  if (doc.containsKey(JSON_IP)) {
+    strlcpy(Data_from_Stream.ip,
+            doc[JSON_IP],
+            sizeof(Data_from_Stream.ip));
+  }
+
+  if (doc.containsKey("rssi")) {
+    Data_from_Stream.rssi = doc["rssi"];
+  }
 
   data_controll.lastDataMillis = millis();
   data_controll.Data_error = Data_Valid;
 }
 
-
-int8_t OpenRemiseProtokoll::parseJson(const char* json_buffer) {
-    // Implementation for parsing JSON data
-    // Use ArduinoJson library to parse the JSON string
-    // Extract relevant information and store in data structures
-    // Return 0 on success, error code otherwise
-
-
-//deserializeJson(doc, _transport);
-// Example: Extracting values from JSON
-//const char* id = doc[JSON_ID]; // "id" element 
-//const char* ip = doc[JSON_IP]; // "ip" element
-//const int status = doc[JSON_STATUS]; // "status" element
-//const char* service = doc[JSON_Service]; // "service" element
-    //....
-// Further processing of extracted data
-
-
-
-
-        return 0; // Placeholder return value
-
-    } ;
+const Data_from_Stream_t& OpenRemiseProtokoll::getDatafromStream() const {
+  return Data_from_Stream;
+}
 
 
 
