@@ -30,12 +30,16 @@ class OpenRemiseDisplay {
     uint8_t update(); // TAsk to update display
     uint8_t clear();
    // Anzeige Methoden
-    void ShowError();
     void ShowWelcome();
-    void ShowNormalMode(); 
-    void ShowNetwork();
-
+    void ShowNormalMode();
+    void ShowNetwork(); 
+    void ShowError();
+    void ShowLearn();
+    void ShowUni();
+    void ShowInvalid();
     void ShowLearnMode();
+
+    //API 
     
     void Set_Current_Screen(uint8_t screen_id);
     uint8_t get_Current_Screen() ;
@@ -50,6 +54,7 @@ class OpenRemiseDisplay {
     SCREEN_NETWORK,
     SCREEN_ERROR,
     SCREEN_LEARN,
+    SCREEN_UNI,    // Screen for direct write 
     // Add more screens as needed
     SCREEN_INVALID,
     NUM_SCREENS
@@ -73,12 +78,13 @@ struct ScreenDescriptor {
     ScreenId current_screen;
 
     const ScreenDescriptor screens[NUM_SCREENS] =  {
-     {SCREEN_INVALID, false}, // Default screen, not used but placeholder for index 0
+    {SCREEN_INVALID, false}, // Default screen, not used but placeholder for index 0
     {SCREEN_WELCOME, false},
     {SCREEN_MAIN, false},
     {SCREEN_ERROR, true},     //Fehler-Screen blinkt
     {SCREEN_NETWORK, false },
-    {SCREEN_LEARN, true }// Lernmodus blinkt
+    {SCREEN_LEARN, true },// Lernmodus blinkt
+    {SCREEN_UNI,false   } // universal screen
     };
     
 

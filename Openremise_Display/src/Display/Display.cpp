@@ -281,6 +281,11 @@ void OpenRemiseDisplay::ShowNetwork() {
 }   
 
 
+void OpenRemiseDisplay::ShowInvalid ()
+{ //set Error on main dont show screen
+  
+}
+
 //Hilfsfunktionen 
 
 void OpenRemiseDisplay::Set_Current_Screen(uint8_t screen_id) { 
