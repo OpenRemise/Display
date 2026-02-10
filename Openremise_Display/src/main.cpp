@@ -19,6 +19,7 @@ unsigned long waittime;
   SYS.State = MODE_INIT;
   SYS.Error_Code = ERROR_NONE; // Set error code to none initially
 Serial.begin(115200);
+// Protkoll initialisieren
 protokoll.begin(Serial);
 #ifdef SERIAL_DEBUG
 Debug_port.begin(9600);
@@ -63,7 +64,7 @@ Debug_port.begin(9600);
             delay(500);
         }
      }
-// Protkoll initialisieren
+
 
 //Wait  for S3 sending json data on HW Uart mit 115200 Baud
 
@@ -78,13 +79,18 @@ buttons.SetLED(BUTTON_A, true);
 // Set initial screen to normal mode
 
 }
+/// @brief 
+// Main loop only get all information of the actuall screen and providet them to the adisplay
+// important is that only the information for the actual screen will be
+// taken from Protokoll modul.
+// The buttons will be turned off after 5sec of inactivity ( no Button pushed, no event occured) 
+
+
 
 void loop() {
  
   bool sleep_triggered = false; // Flag to track if sleep mode has been triggered
   // Main loop
-
-
   unsigned long wait_time = millis();
  
   //get  the input from enviroment
@@ -145,6 +151,10 @@ if (sleep_triggered == false) {
       buttons.SetLED(BUTTON_A, LED_ON);
       buttons.SetLED(BUTTON_B, LED_ON);
         break;
+    case display.SCREEN_UNI :
+    //    no content defined 
+      buttons.SetLED(BUTTON_A, LED_ON);
+      buttons.SetLED(BUTTON_B, LED_ON);
     default:
         break;}
 }
@@ -160,12 +170,13 @@ else
 
  if (SYS.Error_Code != ERROR_NONE) {
   if (millis() - SYS.Last_Run > 5000) { // If 5 seconds have passed since error occurred
-    SYS.Error_Code = ERROR_NONE; // Clear error code after displaying for 5 seconds
+    SYS.Error_Code = ERROR_NONE; // Clear error code after displaying for 5 seconds only  for testing
     display.set_error_code(SYS.Error_Code); // Update display to clear error message
     display.Set_Current_Screen(display.SCREEN_MAIN);
     }
     else
     {
+    sleep_triggered = false; // wakup on error 
     display.Set_Current_Screen(display.SCREEN_ERROR) ;
     display.force_update(); // Force update to show error screen immediately
     display.set_error_code(SYS.Error_Code, "KOM ERROR!"); // Set error code and message for display

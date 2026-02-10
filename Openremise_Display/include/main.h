@@ -59,11 +59,11 @@ enum Mode {
 
 enum ErrorCodes {
     ERROR_NONE,
-    ERROR_DISPLAY,
-    ERROR_BUTTONS,
-    ERROR_PROTOKOLL,
-    ERROR_S3_NO_WIFI,
-    ERROR_S3_SHORTCUT,
+    ERROR_DISPLAY =0x01,
+    ERROR_BUTTONS=0x02,
+    ERROR_PROTOKOLL=0x04,
+    ERROR_S3_NO_WIFI=0x10,
+    ERROR_S3_SHORTCUT=0x20,
     
     // Add more error codes as needed
     ERROR_UNKNOWN = 0xFF};
