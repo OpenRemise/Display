@@ -38,7 +38,8 @@
 // Modul defines 
 #define PROTOKOLL_DATA_TIMEOUT 2000
 #define RX_BUFFER_SIZE  30 // may  adapt to a better value
-
+#define ERROR_TEXT_LEN  10 
+#define ERROR_INFO_LEN  10
 
 enum Protokoll_Data_error_t{
 NO_Data,
@@ -55,18 +56,24 @@ NO_Data,
 
 // Data from Stream 
 struct Data_from_Stream_t  {
+  //network 
   char ip[16];
   char state[12];
+  char ssid[25];
   int rssi;
+  //Track
  // Add as needed 
   float voltage;
   float current; 
   bool  track_state;
+  uint8_t Status;
 
-
- bool valid;
+  // Error 
+  uint8_t Error_id; // Error code from S3 
+  char Error_text [ERROR_TEXT_LEN]; 
+  char Error_INFO [ERROR_INFO_LEN];
 }; 
-Data_from_Stream_t Data_from_Stream;
+
 // Define Class  
 
 class OpenRemiseProtokoll {
@@ -99,6 +106,7 @@ private:
     Protokoll_Data_error_t Data_error;  
   };
 data_controll_t data_controll;
+Data_from_Stream_t Data_from_Stream;
 
   //runtime variables
     Stream* _transport = nullptr; // Transport stream (e.g., Serial)
@@ -110,7 +118,7 @@ data_controll_t data_controll;
 
 // buffer for incoming JSON data
 //char json_buffer[358]; // adjust size as needed
-StaticJsonDocument<256> doc ;
+JsonDocument doc ;
 
  // Privat functions 
  Protokoll_Data_error_t Checktimeout();  

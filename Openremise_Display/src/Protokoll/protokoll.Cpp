@@ -108,7 +108,7 @@ void OpenRemiseProtokoll::process()
 }
 
 const Data_from_Stream_t& OpenRemiseProtokoll::getDatafromStream() const {
-  return Data_from_Stream;
+ return Data_from_Stream;
 }
 
 
