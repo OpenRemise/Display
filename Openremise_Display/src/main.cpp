@@ -167,6 +167,14 @@ else
 
 
 // Dominant Event is error state  
+// collect Errors 
+if (display.SCREEN_INVALID == display.get_Current_Screen())
+      {
+        SYS.Error_Code |= ERROR_DISPLAY;
+      }
+
+
+// Show all Errors in 5  sec cykle
 
  if (SYS.Error_Code != ERROR_NONE) {
   if (millis() - SYS.Last_Run > 5000) { // If 5 seconds have passed since error occurred
