@@ -31,7 +31,10 @@
 //Debug and Learn mode
 #define JSON_LEARN_MODE "learn_mode" // start / stop Learn mode True / false/ display 
 #define JSON_LEAN_VALUE "learn_value" // Value for learn mode 
+#define JSON_TEXT_START "Write Start"
 #define JSON_DISPLAY_TEXT "display_text" // start / stop Text to be shown on the display True / false 
+
+#define JSON_TEXT_STOPP "Write stopp"
 // More JSON elements can be added as needed
 
 

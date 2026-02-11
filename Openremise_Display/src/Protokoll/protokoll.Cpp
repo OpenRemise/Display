@@ -99,8 +99,15 @@ void OpenRemiseProtokoll::process()
             sizeof(Data_from_Stream.ip));
   }
 
-  if (doc.containsKey("rssi")) {
-    Data_from_Stream.rssi = doc["rssi"];
+  if (doc.containsKey(JSON_WIFI_SSID)) {
+      strlcpy(Data_from_Stream.ssid,
+            doc[JSON_WIFI_SSID],
+            sizeof(Data_from_Stream.ssid));
+  }
+  if (doc.containsKey(JSON_WIFI_PWR)) {
+      strlcpy(Data_from_Stream.rssi,
+            doc[JSON_WIFI_PWR],
+            sizeof(Data_from_Stream.rssi));
   }
 
   data_controll.lastDataMillis = millis();
