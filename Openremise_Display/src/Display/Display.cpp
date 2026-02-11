@@ -91,6 +91,15 @@ uint8_t OpenRemiseDisplay::clear() {
     // Clear display content
     return (0) ;
 }   
+void OpenRemiseDisplay::update_screencontent()
+{
+
+}
+
+
+
+
+
 
 // Anzeige Methoden
  
@@ -99,8 +108,9 @@ void OpenRemiseDisplay::ShowWelcome() {
     // Show welcome message on the display
     // Example: Display "Welcome" text, show logo, etc.
     // Display welcome message on the screen
-    //const char* Title = "Open Remise";
-    const char* line2 = "Welcome!";
+ 
+    const char* line1=  "Welcome!";
+    const char* line2 = "Open Remise Rev 0.6" ;
     const char* line3 = "Display Rev 0.2";
     const char* line4 = "Wait for data...";
     u8g2.firstPage();
@@ -113,16 +123,17 @@ void OpenRemiseDisplay::ShowWelcome() {
         u8g2.setFont(u8g2_font_helvR08_tf);
 
         // Horizontales zentrieren
-        //int16_t x1 = (128 - u8g2.getStrWidth(Title)) / 2;
+        int16_t x1 = (128 - u8g2.getStrWidth(line1)) / 2;
         int16_t x2 = (128 - u8g2.getStrWidth(line2)) / 2;
         int16_t x3 = (128 - u8g2.getStrWidth(line3)) / 2;
         int16_t x4 = (128 - u8g2.getStrWidth(line4)) / 2;
 
         // Y-Koordinaten
-       // u8g2.drawStr(x1, 30, Title);
-        u8g2.drawStr(x2, 60, line2);
-        u8g2.drawStr(x4, 90, line4);
-        u8g2.drawStr(x3, 120, line3);
+    
+        u8g2.drawStr(x1, 60, line1);
+        u8g2.drawStr(x2, 97, line2);
+        u8g2.drawStr(x3, 110, line3 );
+        u8g2.drawStr(x4, 120, line4);
 
     } while (u8g2.nextPage());
 
@@ -141,40 +152,78 @@ void OpenRemiseDisplay::ShowNormalMode() {
     // Code to display normal mode information
     // Show normal operation details on the display
     // Example: Display status info, show operational data, etc.
-    // Display normal mode information on the screen
+    /*Display normal mode information on the screen
     const char* Title = "Track ";
     const char* line2 = "Voltage ";
     const char* line3 = "Current";
     const char* line4 = "Status";
+*/
+    int8_t myidx =findScreenDescrpitorIndex();
 
     u8g2.firstPage();
     do {
                 // frame im takt blinken lassen 
-        if (BLink_STATE && screens[current_screen].blink) {
-            u8g2.setDrawColor(2); // XOR mode for blinking
-        } else {                                
-            u8g2.setDrawColor(1); // Normal mode
-        }
-        // Frame zeichnen
-        u8g2.drawFrame(0,0,128,128);
-            u8g2.setDrawColor(1); // rest text nur normal zeichnen
-        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+        blinking_frame(); 
+
         u8g2.setFont(u8g2_font_helvR08_tf);
         //Static Text 
         // Horizontales zentrieren
         int16_t x1 = (8); // Fixed position for title
         int16_t x2 = (50); // Fixed position for labels
 
-        // Y-Koordinaten
+       
+        //Statics from Screndescriptor 
+        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
+        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
+        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
+        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
+        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
+        //Data Platzhalter
+        u8g2.drawStr(x2, 78,Content.Display_info_1); // "12,7 V ");
+        u8g2.drawStr(x2, 93,Content.Display_info_2); // "0,5 A");
+        u8g2.drawStr(x2, 108,Content.Display_info_3); // "ON");
+        u8g2.drawStr(x2, 120,Content.Display_info_4); //  "ON");
 
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, Title);
-        u8g2.drawStr(x1, 78, line2);
-        u8g2.drawStr(x1, 93, line3);
-        u8g2.drawStr(x1, 108, line4);
+
+    } while (u8g2.nextPage());
+}   
+
+
+void OpenRemiseDisplay::ShowDisplay() {
+    // Code to display normal mode information
+    // Show normal operation details on the display
+    // Example: Display status info, show operational data, etc.
+    /*Display normal mode information on the screen
+    const char* Title = "Track ";
+    const char* line2 = "Voltage ";
+    const char* line3 = "Current";
+    const char* line4 = "Status";
+*/
+    int8_t myidx =findScreenDescrpitorIndex();
+
+    u8g2.firstPage();
+    do {
+                // frame im takt blinken lassen 
+        blinking_frame(); 
+
+        u8g2.setFont(u8g2_font_helvR08_tf);
+        //Static Text 
+        // Horizontales zentrieren
+        int16_t x1 = (8); // Fixed position for title
+        int16_t x2 = (50); // Fixed position for labels
+
+       
+        //Statics from Screndescriptor 
+        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
+        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
+        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
+        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
+        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
         //Data Platzhalter
         u8g2.drawStr(x2, 78, "12,7 V ");
         u8g2.drawStr(x2, 93, "0,5 A");
         u8g2.drawStr(x2, 108, "ON");
+        u8g2.drawStr(x2, 120, "POM");
 
 
     } while (u8g2.nextPage());
@@ -189,24 +238,7 @@ void OpenRemiseDisplay::ShowError() {
 
     u8g2.firstPage();
     do { 
-        
-        if(BLink_STATE && screens[current_screen].blink) {
-                   //FRAME zeichnen
-          u8g2.setDrawColor(1); // Normal mode
-          for(int i=0; i<5; i+=2) {
-                u8g2.drawFrame(i, i, 128 - 2*i, 128 - 2*i); // Draw the inner frame
-                // LOGO zeichnen        
-        u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); // Display small logo at (5,115)
-            }
-        } else {                                
-          u8g2.drawFrame(0,0,128,128); // Draw the outer frame only when not blinking
-          // LOGO zeichnen        
-        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
-        }
-
-
-   
-        
+        blinking_frame();    
       
         u8g2.setFont(u8g2_font_helvR08_tf);
         //Static Text 
@@ -236,46 +268,37 @@ void OpenRemiseDisplay::ShowError() {
 }  
 
 void OpenRemiseDisplay::ShowNetwork() {
+
     // Code to display network information
     // Show network details on the display
     // Example: Display "Network" text, show IP address, etc.
     // Display network information on the screen
     const char* Title = "Network";
-    const char* line2 = "IP ";
-    const char* line3 = "Status";
-    const char* line4 = "SSid";
+    const char* line_1 = "IP ";
+    const char* line_2 = "Status";
+    const char* line_3 = "SSid";
+    const char* line_4 = "RSSI";
+
 
     u8g2.firstPage();
     do {
         
         // frame im takt blinken lassen 
-        if (BLink_STATE && screens[current_screen].blink) {
-            u8g2.setDrawColor(2); // XOR mode for blinking
-        } else {                                
-            u8g2.setDrawColor(1); // Normal mode
-        }
-        // Frame zeichnen        
-        u8g2.drawFrame(0,0,128,128);
-        
-        u8g2.setDrawColor(1); // Normal mode for rest
-        
-        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+        blinking_frame();
         u8g2.setFont(u8g2_font_helvR08_tf);
-        //Static Text 
-        // Horizontales zentrieren
-        int16_t x1 = (8); // Fixed position for title
-        int16_t x2 = (50); // Fixed position for labels
+        
+        //Fixpart of  screen
+        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y,Title);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y, line_1);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS, line_2);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*2,line_3);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*3, line_4);
 
-        // Y-Koordinaten
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, Title);
-        u8g2.drawStr(x1, 78, line2);
-        u8g2.drawStr(x1, 93, line3);
-        u8g2.drawStr(x1, 108, line4);
         //Data Platzhalter
-        u8g2.drawStr(x2, 78, "192.168.1.100");
-        u8g2.drawStr(x2, 93, "Connected");
-        u8g2.drawStr(x2, 108, "MyWiFiSSID");
-
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y,                 "192.168.1.100");
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS, "Connected");
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*2, "MyWiFiSSID");
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*3, " 85% ");
 
     } while (u8g2.nextPage());
 }   
@@ -283,7 +306,10 @@ void OpenRemiseDisplay::ShowNetwork() {
 
 void OpenRemiseDisplay::ShowInvalid ()
 { //set Error on main dont show screen
-  
+  do{
+
+
+   } while (u8g2.nextPage());
 }
 
 //Hilfsfunktionen 
@@ -309,7 +335,18 @@ void OpenRemiseDisplay::force_update() {
 uint8_t OpenRemiseDisplay::get_Current_Screen()  {
     return static_cast<uint8_t>(current_screen);
 }   
+void OpenRemiseDisplay::Set_Current_content(const char* line1,const char* line2,const char* line3,const char* line4,const char* line5)
+      {
+        Content.Display_info_1 = line1;
+        Content.Display_info_2 = line2;
+        Content.Display_info_3 = line3;
+        Content.Display_info_4 = line4;
+        Content.Display_info_5 = line5;
+     
+        
 
+        
+      }
 
 void OpenRemiseDisplay::set_error_code(uint8_t error_code, const char* error_str) {
     // Code to set the error code and update the display accordingly
@@ -347,5 +384,35 @@ void OpenRemiseDisplay::toggleBlinkState() {
             }           
         }  
      } 
-      
+
+     void OpenRemiseDisplay::blinking_frame()
+     {
+       if(BLink_STATE && screens[current_screen].blink) {
+                   //FRAME zeichnen
+          u8g2.setDrawColor(1); // Normal mode
+          for(int i=0; i<5; i+=2) {
+                u8g2.drawFrame(i, i, 128 - 2*i, 128 - 2*i); // Draw the inner frame
+                // LOGO zeichnen        
+        u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); // Display small logo at (5,115)
+            }
+        } 
+        else {                                
+          u8g2.drawFrame(0,0,128,128); // Draw the outer frame only when not blinking
+          // LOGO zeichnen        
+        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+        }
+
+     }
+
+     int8_t OpenRemiseDisplay::findScreenDescrpitorIndex()
+     {
+        for (uint8_t i =0u ;i < NUM_SCREENS; i++)
+        if (screens[i].id == current_screen)
+           { return (int8_t) i;
+           }
+
+           return (int8_t) -1;
+     }
+
+
 // End of Display.cpp
