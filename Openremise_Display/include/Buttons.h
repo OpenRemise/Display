@@ -25,7 +25,7 @@
 #define LED_ON           LOW
 #define LED_OFF          HIGH
 #define Button_DEBOUNCE_TIME 50 // milliseconds
-#define BUTTON_HOLD_TIME    500 // milliseconds
+#define BUTTON_HOLD_TIME    160 // milliseconds
 #define BUTTON_RESET_TIME   5000 // milliseconds
 
 
