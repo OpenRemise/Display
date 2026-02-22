@@ -177,6 +177,7 @@ private:
     const unsigned long DATA_TIMEOUT_MS = PROTOKOLL_DATA_TIMEOUT ;
     Protokoll_Data_error_t Data_error;  
     Flow_control_t Flow_control; // optional, for managing data flow control if needed
+    Data_from_Stream_IDX currentIdx;
   };
 
   data_controll_t data_controll;

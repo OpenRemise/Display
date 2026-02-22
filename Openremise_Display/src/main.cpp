@@ -277,7 +277,7 @@ void Get_all_error_code()
     SYS.Error_Code = ERROR_DISPLAY;
   }
 
-  if (protokoll.Get_Protokoll_Error() != ERROR_NONE)
+  if (protokoll.Get_Protokoll_Error() != Data_Valid)
   {
     SYS.Error_Code = ERROR_PROTOKOLL;
   }

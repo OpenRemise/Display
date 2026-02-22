@@ -43,7 +43,7 @@ uint8_t OpenRemiseProtokoll::begin(Stream& transport)
     data_controll.Data_error = NO_Data;
     data_controll.lastDataMillis = millis();
     data_controll.Flow_control = Flow_None; // Initialize flow control state
-
+    data_controll.currentIdx  = IDX_NONE;
 
 
 
@@ -109,8 +109,6 @@ void OpenRemiseProtokoll::poll()
  * damit nur einmal Datenhaltung im Protokoll  Kein Jsonarduino Object oder ähnliches nötig ist.
  * Die Daten werden als String gespeichert, damit sie direkt in der Display Funktion verwendet werden können. 
  los gehts  */
-Data_from_Stream_IDX idx = IDX_NONE; // Variable to store the index of the current key being processed
-
 
   while (_transport->available()) {
     char c = _transport->read(); 
@@ -120,6 +118,7 @@ Data_from_Stream_IDX idx = IDX_NONE; // Variable to store the index of the curre
         if (c == '{') {
           data_controll.Flow_control = Flow_Reading_Key;
           rxIndex = 0; // Reset buffer index for new message
+          data_controll.currentIdx = IDX_NONE; // Reset current index for new message 
         }
         break;
 
@@ -129,7 +128,7 @@ Data_from_Stream_IDX idx = IDX_NONE; // Variable to store the index of the curre
         if (c == ':') {
           rxBuffer[rxIndex] = '\0'; // Null-terminate the buffer
           data_controll.Flow_control = Flow_Reading_Value; // Transition to processing data state
-          idx = getProtIndex(rxBuffer); // Get index for the current key if no valid  Key is found, it will return IDX_NONE
+          data_controll.currentIdx = getProtIndex(rxBuffer); // Get index for the current key if no valid  Key is found, it will return IDX_NONE
           rxIndex = 0; // Reset buffer index for value processing
         } else if (rxIndex < RX_BUFFER_SIZE - 1) {
           rxBuffer[rxIndex++] = c; // Store character in buffer and increment index 
@@ -147,10 +146,10 @@ Data_from_Stream_IDX idx = IDX_NONE; // Variable to store the index of the curre
           rxBuffer[rxIndex] = '\0'; // Null-terminate the buffer
           // Process the key-value pair here, e.g., store in data array based on key index
           
-          if (idx != IDX_NONE) { //idx IDX_NONE bedeutet, dass kein gültiger Schlüssel gefunden wurde, daher sollten wir nur dann Daten speichern, wenn ein gültiger Schlüssel gefunden wurde
+          if (data_controll.currentIdx != IDX_NONE) { //idx IDX_NONE bedeutet, dass kein gültiger Schlüssel gefunden wurde, daher sollten wir nur dann Daten speichern, wenn ein gültiger Schlüssel gefunden wurde
             // Store value in data array at the corresponding index
-            strncpy(data[idx], rxBuffer, MAX_STRING - 1); // Copy value to data array with bounds checking
-            data[idx][MAX_STRING - 1] = '\0'; // Ensure null-termination
+            strncpy(data[data_controll.currentIdx], rxBuffer, MAX_STRING - 1); // Copy value to data array with bounds checking
+            data[data_controll.currentIdx][MAX_STRING - 1] = '\0'; // Ensure null-termination
           }
           if (c == '}') {// If '}' is received, it indicates the end of the message
             // Set flag to indicate complete message is ready for processing
