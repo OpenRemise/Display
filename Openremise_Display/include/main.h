@@ -2,12 +2,9 @@
 
 #include <SoftwareSerial.h> // Include Software Serial library
 #include <Arduino.h> // Include Arduino core library  
-#include "Display.h" // Include Display module
 #include "Buttons.h"  // Include Button module
 #include "protokoll.h" // Include Protokoll module Define of  Protokoll 
-
-
-
+#include "Display.h" // Include Display module
 
 // Global Variables
 #define ON 1
@@ -37,6 +34,7 @@
 
 
 
+
 // System state structure
 
 struct SYS_
@@ -46,6 +44,7 @@ uint8_t Error_Code; // Error code variable
 double time_stamp; // System timestamp
 double time_interval; // System time interval
 double Last_Run; // Last recorded time /* data */
+bool sleep_triggered; // Flag to track if sleep mode has been triggered
 } SYS; // System structure instance
 
 enum Mode {
@@ -53,6 +52,7 @@ enum Mode {
     MODE_LEARN,
     MODE_NORMAL,
     MODE_NETWORK,
+    MODE_RESET,
     MODE_SLEEP,
     MODE_ERROR =0xFF
 };  
@@ -66,11 +66,13 @@ enum ErrorCodes {
     ERROR_S3_SHORTCUT=0x20,
     
     // Add more error codes as needed
-    ERROR_UNKNOWN = 0xFF};
+    ERROR_UNKNOWN = 0xFF
+};
 
 //system funktions 
-  
 
-    
+void Set_LEDS (ScreenId idx);
+void Set_Content(ScreenId idx);  
+void Set_next_Screen( ScreenId id, uint8_t button_value );
 
 
