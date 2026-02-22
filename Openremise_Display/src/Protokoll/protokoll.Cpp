@@ -1,16 +1,28 @@
+
+
 // Protokoll handler implementation file
 #include "protokoll.h"
+
+#ifndef PROTOKOLL_MANUAL // If PROTOKOLL_MANUAL is defined,
+// the implementation will be provided in a separate file (e.g., Protokoll_2.cpp)
+// This allows for manual control Aover the inclusion of the implementation, which can be useful for testing
+// or when the implementation is large and you want to keep it separate from the header.
 
 /// @brief  Initialize the Protokoll module
 /// @return     0 on success, error code otherwise
 
 /// @brief 
+
+
 OpenRemiseProtokoll::OpenRemiseProtokoll()
   : _transport(nullptr),
     rxIndex(0)
 {
 }
 
+/****************************************************************************************/
+/****************************************************************************************/
+/****************************************************************************************/
 
 uint8_t OpenRemiseProtokoll::begin(Stream& transport)
 {
@@ -25,11 +37,10 @@ uint8_t OpenRemiseProtokoll::begin(Stream& transport)
     // Read out Flash values ( json names only from learning mode )
     // Sort names in alphbetic order for faster search
  _transport = &transport;
-
     rxIndex = 0;
  
     data_controll.Data_send =false;
-    data_controll.Data_received= false;  //s3 daten empangen 
+    data_controll.Data_received= false;  //s3 daten empangen ?
     data_controll.Data_error = NO_Data;
     data_controll.lastDataMillis = 0;
   
@@ -51,9 +62,30 @@ int8_t OpenRemiseProtokoll::update()
   return Data_Ok;
 }
 
+
+/****************************************************************************************/
+
 Protokoll_Data_error_t OpenRemiseProtokoll::Get_Protokoll_Error (){
   return data_controll.Data_error;
 };
+
+Data_from_Stream_IDX OpenRemiseProtokoll :: getProtIndex(const char* key)
+{
+    for (size_t i = 0U; i < (sizeof(jsonMap) / sizeof(jsonMap[0])); ++i)
+    {
+        if (strcmp(key, jsonMap[i].jsonKey) == 0)
+        {
+            return jsonMap[i].dataId;
+        }
+    }
+
+    return IDX_NONE;
+}
+
+
+
+/****************************************************************************************/
+
 
 // collect data 
 void OpenRemiseProtokoll::poll()
@@ -74,6 +106,7 @@ void OpenRemiseProtokoll::poll()
   }
 }
 
+/****************************************************************************************/
 
 void OpenRemiseProtokoll::process()
 {
@@ -85,40 +118,44 @@ void OpenRemiseProtokoll::process()
     data_controll.Data_error = Data_Parse_Error;
     return;
   }
+//  daten  direkt in den Protokoll speicher schreiben  
+//  speicherung als string 
+    // JSON-Objekt durchlaufen
+    for (JsonPair kv : doc.as<JsonObject>())
+    {
+        const char* key   = kv.key().c_str();
+        const char* value = kv.value().as<const char*>();
 
-  // Nur Felder lesen, die du brauchst
-  if (doc.containsKey(JSON_STATUS)) {
-    strlcpy(Data_from_Stream.state,
-            doc[JSON_STATUS],
-            sizeof(Data_from_Stream.state));
-  }
+        Data_from_Stream_IDX idx = getProtIndex(key);
 
-  if (doc.containsKey(JSON_IP)) {
-    strlcpy(Data_from_Stream.ip,
-            doc[JSON_IP],
-            sizeof(Data_from_Stream.ip));
-  }
-
-  if (doc.containsKey(JSON_WIFI_SSID)) {
-      strlcpy(Data_from_Stream.ssid,
-            doc[JSON_WIFI_SSID],
-            sizeof(Data_from_Stream.ssid));
-  }
-  if (doc.containsKey(JSON_WIFI_PWR)) {
-      strlcpy(Data_from_Stream.rssi,
-            doc[JSON_WIFI_PWR],
-            sizeof(Data_from_Stream.rssi));
-  }
+        if (idx != IDX_NONE)
+        {
+           if (kv.value().is<const char*>())
+           {
+               value = kv.value().as<const char*>();
+           }
+           else
+           {
+               static char numBuffer[16];
+               snprintf(numBuffer, sizeof(numBuffer), "%ld",
+                        kv.value().as<long>());
+               value = numBuffer;
+           }
+        }
+    }
 
   data_controll.lastDataMillis = millis();
   data_controll.Data_error = Data_Valid;
 }
 
-const Data_from_Stream_t& OpenRemiseProtokoll::getDatafromStream() const {
- return Data_from_Stream;
-}
+  const char* OpenRemiseProtokoll:: getData(Data_from_Stream_IDX id)
+    {
+        if(id >= IDX_MAX)
+            return (""); 
+        return data[id];
+    }
 
-
+/****************************************************************************************/
 
 Protokoll_Data_error_t  OpenRemiseProtokoll:: Checktimeout()
 {
@@ -132,3 +169,4 @@ return  Data_Ok;
 }
 
     //end of Protokoll/protokoll.Cpp
+#endif // PROTOKOLL_MANUAL
