@@ -37,12 +37,14 @@ uint8_t OpenRemiseDisplay::begin() {
   BLink_STATE = true;
   last_blink_time = 0;
 
-  Serial.println(F("OpenRemiseDisplay: INIT OK"));
+ #ifdef SERIAL_DEBUG
+  Serial1.println(F("OpenRemiseDisplay: INIT OK"));
+#endif  
 // Strings default values 
 Display_error_code =0;
 Display_info_string = " no info" ;
 Display_error_string = "No information";
-
+Set_Current_content("--", "--", "--", "--", "--");
     return 0x00; // alles OK
 } 
 
@@ -69,7 +71,16 @@ toggleBlinkState(); // manage blink state
             ShowError();
             break;
         case SCREEN_NETWORK:
-            ShowNetwork();
+             ShowNormalMode(); // for now we will use the same display method for network and main screen, but with different content
+            break;
+        case SCREEN_LEARN:
+            ShowLearnMode();    
+            break;
+        case SCREEN_UNI:
+            ShowDisplay();    
+            break;
+        case SCREEN_INVALID:
+            ShowInvalid();
             break;
         default:
             break;
@@ -91,18 +102,93 @@ uint8_t OpenRemiseDisplay::clear() {
     // Clear display content
     return (0) ;
 }   
-void OpenRemiseDisplay::update_screencontent()
+void OpenRemiseDisplay::Set_Current_content ( const char* l1, const char* l2, const char* l3,const char* l4,const char* l5)
 {
-
-}
-
-
-
-
-
+    content[0] = l1;
+    content[1] = l2;
+    content[2] = l3;
+    content[3] = l4;
+    content[4] = l5;
+} 
 
 // Anzeige Methoden
- 
+// Display methode  for all not generic  Screens 
+void OpenRemiseDisplay::ShowNormalMode() {
+    // Code to display normal mode information
+    // Show normal operation details on the display
+    // Example: Display status info, show operational data, etc.
+    /*Display normal mode information on the screen
+    const char* Title = "Track ";
+    const char* line2 = "Voltage ";
+    const char* line3 = "Current";
+    const char* line4 = "Status";
+*/
+    int8_t myidx =findScreenDescrpitorIndex();
+
+    u8g2.firstPage();
+    do {
+                // frame im takt blinken lassen 
+        blinking_frame(); 
+
+        u8g2.setFont(u8g2_font_helvR08_tf);
+        //Static Text 
+        // Horizontales zentrieren
+        int16_t x1 = (8); // Fixed position for title
+        int16_t x2 = (50); // Fixed position for labels
+
+       
+        //Statics from Screndescriptor 
+        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
+        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
+        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
+        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
+        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
+        //Data dynamik data 
+        u8g2.drawStr(x2, 78,content[0]); // "12,7 V ");
+        u8g2.drawStr(x2, 93,content[1]); // "0,5 A");
+        u8g2.drawStr(x2, 108,content[2]); // "ON");
+        u8g2.drawStr(x2, 120,content[3]); //  "ON");
+
+
+    } while (u8g2.nextPage());
+}   
+// Display methode  for direkt write 
+void OpenRemiseDisplay::ShowDisplay() {
+    // Code to display uni mode information
+    // Show normal operation details on the display
+    // Example: Display status info, show operational data, etc.
+    /*Display normal mode information on the screen
+*/
+    int8_t myidx =findScreenDescrpitorIndex();
+
+    u8g2.firstPage();
+    do {
+                // frame im takt blinken lassen 
+        blinking_frame(); 
+
+        u8g2.setFont(u8g2_font_helvR08_tf);
+        //Static Text 
+        // Horizontales zentrieren
+        int16_t x1 = (8); // Fixed position for title
+        int16_t x2 = (50); // Fixed position for labels
+
+       
+        //Statics from Screndescriptor 
+        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
+        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
+        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
+        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
+        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
+        //Data Platzhalter
+        u8g2.drawStr(x2, 78,content[0]);
+        u8g2.drawStr(x2, 93,content[1]); 
+        u8g2.drawStr(x2, 108,content[2]); 
+        u8g2.drawStr(x2, 120,content[3]); 
+
+
+    } while (u8g2.nextPage());
+}   
+// Generic Screens = Welcome, Error, Invalid, Learnmode
 void OpenRemiseDisplay::ShowWelcome() {
     // Code to display a welcome message
     // Show welcome message on the display
@@ -139,103 +225,11 @@ void OpenRemiseDisplay::ShowWelcome() {
 
 } 
 
-void OpenRemiseDisplay::ShowLearnMode() {
-    // Code to display learn mode information
-    // Show learn mode details on the display
-    // Example: Display "Learn Mode" text, show instructions, etc.
-    // Display learn mode information on the screen
-
-}
-
-
-void OpenRemiseDisplay::ShowNormalMode() {
-    // Code to display normal mode information
-    // Show normal operation details on the display
-    // Example: Display status info, show operational data, etc.
-    /*Display normal mode information on the screen
-    const char* Title = "Track ";
-    const char* line2 = "Voltage ";
-    const char* line3 = "Current";
-    const char* line4 = "Status";
-*/
-    int8_t myidx =findScreenDescrpitorIndex();
-
-    u8g2.firstPage();
-    do {
-                // frame im takt blinken lassen 
-        blinking_frame(); 
-
-        u8g2.setFont(u8g2_font_helvR08_tf);
-        //Static Text 
-        // Horizontales zentrieren
-        int16_t x1 = (8); // Fixed position for title
-        int16_t x2 = (50); // Fixed position for labels
-
-       
-        //Statics from Screndescriptor 
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
-        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
-        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
-        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
-        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
-        //Data Platzhalter
-        u8g2.drawStr(x2, 78,Content.Display_info_1); // "12,7 V ");
-        u8g2.drawStr(x2, 93,Content.Display_info_2); // "0,5 A");
-        u8g2.drawStr(x2, 108,Content.Display_info_3); // "ON");
-        u8g2.drawStr(x2, 120,Content.Display_info_4); //  "ON");
-
-
-    } while (u8g2.nextPage());
-}   
-
-
-void OpenRemiseDisplay::ShowDisplay() {
-    // Code to display normal mode information
-    // Show normal operation details on the display
-    // Example: Display status info, show operational data, etc.
-    /*Display normal mode information on the screen
-    const char* Title = "Track ";
-    const char* line2 = "Voltage ";
-    const char* line3 = "Current";
-    const char* line4 = "Status";
-*/
-    int8_t myidx =findScreenDescrpitorIndex();
-
-    u8g2.firstPage();
-    do {
-                // frame im takt blinken lassen 
-        blinking_frame(); 
-
-        u8g2.setFont(u8g2_font_helvR08_tf);
-        //Static Text 
-        // Horizontales zentrieren
-        int16_t x1 = (8); // Fixed position for title
-        int16_t x2 = (50); // Fixed position for labels
-
-       
-        //Statics from Screndescriptor 
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
-        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
-        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
-        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
-        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
-        //Data Platzhalter
-        u8g2.drawStr(x2, 78, "12,7 V ");
-        u8g2.drawStr(x2, 93, "0,5 A");
-        u8g2.drawStr(x2, 108, "ON");
-        u8g2.drawStr(x2, 120, "POM");
-
-
-    } while (u8g2.nextPage());
-}   
-   
 void OpenRemiseDisplay::ShowError() {
     // Code to display an error message
     // Show error message on the display
     // Example: Display "Error" text, show error icon, etc.
     // Display error message on the screen
-    
-
     u8g2.firstPage();
     do { 
         blinking_frame();    
@@ -267,52 +261,59 @@ void OpenRemiseDisplay::ShowError() {
 
 }  
 
-void OpenRemiseDisplay::ShowNetwork() {
-
-    // Code to display network information
-    // Show network details on the display
-    // Example: Display "Network" text, show IP address, etc.
-    // Display network information on the screen
-    const char* Title = "Network";
-    const char* line_1 = "IP ";
-    const char* line_2 = "Status";
-    const char* line_3 = "SSid";
-    const char* line_4 = "RSSI";
-
-
-    u8g2.firstPage();
-    do {
-        
-        // frame im takt blinken lassen 
-        blinking_frame();
-        u8g2.setFont(u8g2_font_helvR08_tf);
-        
-        //Fixpart of  screen
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y,Title);
-        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y, line_1);
-        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS, line_2);
-        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*2,line_3);
-        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*3, line_4);
-
-        //Data Platzhalter
-        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y,                 "192.168.1.100");
-        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS, "Connected");
-        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*2, "MyWiFiSSID");
-        u8g2.drawStr(SCREEN_DATA_X, SCREEN_FIXED_Y+SCREEN_LINE_DIS*3, " 85% ");
-
-    } while (u8g2.nextPage());
-}   
-
-
 void OpenRemiseDisplay::ShowInvalid ()
 { //set Error on main dont show screen
   do{
+        u8g2.setFont(u8g2_font_helvR08_tf);
+        //Static Text 
+        // Horizontales zentrieren
+        int16_t x1 = (8); // Fixed position for title
+        //int16_t x2 = (50); // Fixed position for labels
+        
+        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, "Invalid Screen!"); // Title for error screen
+ 
+            // error details anzeigen
+       u8g2.setCursor(84, 45);
+       u8g2.print(current_screen);   // Vom System erzeugt error code anzeigen, z.B. 32 = Communication error, 64 = Sensor failure, etc.  
+       u8g2.drawStr(x1, 80,"Screen ID not valid!"); // Label for error code         
+       u8g2.drawStr(x1, 93, "Please check your code!"); // Display error string if available
 
-
-   } while (u8g2.nextPage());
+        
+    } while (u8g2.nextPage());
 }
 
-//Hilfsfunktionen 
+void OpenRemiseDisplay::ShowLearnMode() {
+    // Code to display learn mode information
+    // Show learn mode details on the display
+    // Example: Display "Learn Mode" text, show instructions, etc.
+    // Display learn mode information on the screen
+
+    const char* line1=  "Learn Mode";
+    const char* line2 = "Please follow instructions" ;
+    const char* line3 = "not implemented yet";
+    u8g2.firstPage();
+    do {
+        // Frame zeichnen
+        u8g2.drawFrame(0,0,128,128);
+         u8g2.setDrawColor(1); // Normal mode for rest
+        u8g2.setFont(u8g2_font_helvR08_tf);
+
+        // Horizontales zentrieren
+        int16_t x1 = (128 - u8g2.getStrWidth(line1)) / 2;
+        int16_t x2 = (128 - u8g2.getStrWidth(line2)) / 2;
+
+        // Y-Koordinaten
+    
+        u8g2.drawStr(x1, 60, line1);
+        u8g2.drawStr(x2, 97, line2);  
+        u8g2.drawStr(x2, 110, line3 );  
+
+    } while (u8g2.nextPage());
+}
+
+/******************************************************************************************* */
+/*Hilfsfunktionen ***************************************************************************/
+/******************************************************************************************* */
 
 void OpenRemiseDisplay::Set_Current_Screen(uint8_t screen_id) { 
    
@@ -332,21 +333,9 @@ void OpenRemiseDisplay::force_update() {
     update_screen = true; // Mark screen for update
 }   
 
-uint8_t OpenRemiseDisplay::get_Current_Screen()  {
-    return static_cast<uint8_t>(current_screen);
-}   
-void OpenRemiseDisplay::Set_Current_content(const char* line1,const char* line2,const char* line3,const char* line4,const char* line5)
-      {
-        Content.Display_info_1 = line1;
-        Content.Display_info_2 = line2;
-        Content.Display_info_3 = line3;
-        Content.Display_info_4 = line4;
-        Content.Display_info_5 = line5;
-     
-        
-
-        
-      }
+ScreenId OpenRemiseDisplay::Get_Current_Screen()  {
+    return (current_screen);
+} 
 
 void OpenRemiseDisplay::set_error_code(uint8_t error_code, const char* error_str) {
     // Code to set the error code and update the display accordingly
@@ -370,7 +359,6 @@ void OpenRemiseDisplay::set_info_string( const char* info){
    { Display_info_string = info;}
 
 }
-
 
 void OpenRemiseDisplay::toggleBlinkState() {
     // Code to toggle the blink state
