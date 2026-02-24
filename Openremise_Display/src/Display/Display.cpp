@@ -56,7 +56,8 @@ uint8_t OpenRemiseDisplay::update() {
     // check for changes and refresh display if necessary
     // Example: Redraw UI elements, refresh screen, etc.
     // Update display content based on current state 
-    // blink takt generieren 
+    // blink takt generieren
+    //Only Update screen on change or if blink state changed for blink screens
 toggleBlinkState(); // manage blink state
 // update screen if needed triggered by state change or blink state or button press
  if (update_screen) {
@@ -86,8 +87,7 @@ toggleBlinkState(); // manage blink state
             break;
     }
     update_screen = false; // Reset update flag after updating
- digitalWrite(LED_BUILTIN, update_screen ? HIGH : LOW); // Toggle built-in LED for visual feedback
-    
+ 
 }
 
 

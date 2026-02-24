@@ -100,7 +100,7 @@ const ScreenDescriptor screens[NUM_SCREENS] =  {
     {SCREEN_WELCOME, false," "," "," "," "," "},
     {SCREEN_MAIN, false,"Track ","Voltage : ","Current :","Status :","Mode :"},
     {SCREEN_ERROR, true,"ERROR ","CODE :","What happend "," "," " },     //Fehler-Screen blinkt
-    {SCREEN_NETWORK, false,"Network "," IP ","Status ","SSID ","RSSI " },
+    {SCREEN_NETWORK, false,"Network "," IP ","mDNS ","SSID ","RSSI " },
     {SCREEN_LEARN, true,"LEARN "," "," "," "," "},// Lernmodus blinkt
     {SCREEN_UNI,false," UNI ","> ","> ","> ","> " } // universal screen
     };
