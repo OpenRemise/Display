@@ -99,7 +99,7 @@ void setup()
 // taken from Protokoll modul.
 // The buttons will be turned off after 5sec of inactivity ( no Button pushed, no event occured)
 void loop()
-{
+{ 
 
   //SYS.sleep_triggered = false; // Flag to track if sleep mode has been triggered
   // Main loop
@@ -243,11 +243,13 @@ void Set_Content(ScreenId idx)
   {
   case SCREEN_MAIN:
     // Track daten
-    display.Set_Current_content(protokoll.getData(IDX_TRK_VOLTAGE), protokoll.getData(IDX_TRK_CURRENT), protokoll.getData(IDX_SERVICE), " ", "  ");
+    // Voltage  format should be <XX.XX V> same for current <XX.XX A> and status <status code> and service <service code>
+    //SCREEN_MAIN, false,"Track ","Voltage : ","Current :","Status :","Mode :"
+    display.Set_Current_content(protokoll.getData(IDX_TRK_VOLTAGE), protokoll.getData(IDX_TRK_CURRENT), protokoll.getData(IDX_STATUS),  protokoll.getData(IDX_NONE), "  ");
     break;
   case SCREEN_NETWORK:
-    // network daten
-    display.Set_Current_content(protokoll.getData(IDX_IP), protokoll.getData(IDX_WIFI_SSID), protokoll.getData(IDX_WIFI_PWR), protokoll.getData(IDX_STATUS), "  ");
+    // network daten  " IP ","mDNS ","SSID ","RSSI "
+    display.Set_Current_content(protokoll.getData(IDX_IP), protokoll.getData(IDX_JSON_MDNS), protokoll.getData(IDX_WIFI_PWR), protokoll.getData(IDX_STATUS), "  ");
     break;
   case SCREEN_LEARN:
     //  Not implemented yet
