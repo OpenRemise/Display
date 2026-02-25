@@ -74,10 +74,10 @@
 
 // Modul defines 
 #define PROTOKOLL_DATA_TIMEOUT 2000
-#define RX_BUFFER_SIZE  30 // may  adapt to a better value
+#define RX_BUFFER_SIZE  25 // may  adapt to a better value
 #define ERROR_TEXT_LEN  10 
 #define ERROR_INFO_LEN  10
-#define MAX_STRING  20
+#define MAX_STRING  16 // max string length for data elements, can be adapted as needed
 
 
 // Json Memory mapping  
@@ -156,7 +156,8 @@ public:
 
 uint8_t begin( Stream& transport);
 int8_t update();
-
+bool Get_Content_Changed();
+void reset_Content_Changed();
 // return Pointer on Protokoll buffer !!
 const char* getData(Data_from_Stream_IDX id);
 Data_from_Stream_IDX  getProtIndex(const char* key);
@@ -173,6 +174,7 @@ private:
   struct data_controll_t
   { bool Data_received;  //s3 daten empangen 
     bool Data_send;      // daten an S3 gesendet 
+    bool contentChanged; // flag to indicate if content has changed since last update
     unsigned long lastDataMillis;
     const unsigned long DATA_TIMEOUT_MS = PROTOKOLL_DATA_TIMEOUT ;
     Protokoll_Data_error_t Data_error;  

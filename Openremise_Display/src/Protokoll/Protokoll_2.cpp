@@ -116,7 +116,7 @@ void OpenRemiseProtokoll::poll()
  * damit nur einmal Datenhaltung im Protokoll  Kein Jsonarduino Object oder ähnliches nötig ist.
  * Die Daten werden als String gespeichert, damit sie direkt in der Display Funktion verwendet werden können. 
  los gehts  */
-
+ data_controll.contentChanged = false; // Reset content changed flag at the beginning of polling to track if new content is received during this poll cycle
   while (_transport->available()) {
     char c = _transport->read(); 
    
@@ -141,7 +141,7 @@ void OpenRemiseProtokoll::poll()
           // Ignore quotation marks in keys, they are not part of the actual key name
           break;
         }
-        Serial.print(c);
+        
       if (c == ':') {
           rxBuffer[rxIndex] = '\0'; // Null-terminate the buffer
           data_controll.Flow_control = Flow_Reading_Value; // Transition to processing data state
@@ -163,7 +163,7 @@ void OpenRemiseProtokoll::poll()
       
         break;
         case Flow_Reading_Value:
-        Serial.print(c);// for testing
+
         if(c == '"')
         {
           // Ignore quotation marks in values, they are not part of the actual value
@@ -177,6 +177,11 @@ void OpenRemiseProtokoll::poll()
           if (data_controll.currentIdx != IDX_NONE) { //idx IDX_NONE bedeutet, dass kein gültiger Schlüssel gefunden wurde, 
             //daher sollten wir nur dann Daten speichern, wenn ein gültiger Schlüssel gefunden wurde
             // Store value in data array at the corresponding index
+            //compare the new value with the existing value in the data array, if it is different, 
+            //we set the contentChanged flag to true, so that the display can update accordingly
+            if (strcmp(data[data_controll.currentIdx], rxBuffer) != 0) {
+              data_controll.contentChanged = true;
+            }
             strncpy(data[data_controll.currentIdx], rxBuffer, MAX_STRING - 1); // Copy value to data array with bounds checking
             data[data_controll.currentIdx][MAX_STRING - 1] = '\0'; // Ensure null-termination
           }
@@ -211,7 +216,7 @@ void OpenRemiseProtokoll::poll()
     }
   }
    
-digitalWrite(LED_BUILTIN, LOW); // Turn off built-in LED after processing incoming data
+
 
 }// End of poll function
 
@@ -255,6 +260,17 @@ if ( millis() - data_controll.lastDataMillis > PROTOKOLL_DATA_TIMEOUT){
 }
 return  Data_Ok;
 }
+
+
+
+bool OpenRemiseProtokoll::Get_Content_Changed()
+{
+  return data_controll.contentChanged; // Return the flag indicating if content has changed since the last check
+}
+void OpenRemiseProtokoll::reset_Content_Changed()
+{  data_controll.contentChanged = false; // Reset the content changed flag after processing the updated content
+}
+
 
     //end of Protokoll/protokoll2.Cpp
 
