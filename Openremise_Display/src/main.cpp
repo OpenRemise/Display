@@ -17,7 +17,7 @@ void setup()
   SYS.State = MODE_INIT;
   SYS.Error_Code = ERROR_NONE; // Set error code to none initially
   SYS.time_stamp = millis();
-  SYS.time_interval = 5000; // Set time interval for error display or other timed events
+  SYS.time_interval = WAIT_TIME_STARTTIME; // Set time interval for error display or other timed events
   SYS.Last_Run = millis();  // Initialize last run time to current time
 
 // Schnittstellen initialisieren
@@ -25,13 +25,6 @@ void setup()
   Debug_port.begin(9600); // Debug port mit 9600 Baud software serial
   Debug_port.println(F("OpenRemise Display Debugport activ"));
 #endif
-  Serial.begin(115200); // Protokoll kommunikation über HW Uart mit 115200 Baud
-  // Protokoll initialisieren
-  protokoll.begin(Serial); // Protokoll mit HW Serial als Transport initialisieren
-  // Buttons initialisieren
-  buttons.begin(BUTTON_A_PIN, LED_A_PIN, BUTTON_B_PIN, LED_B_PIN); // Button and LED pins initialisieren
-  buttons.SetLED(BUTTON_A, true);                                  // LED A an für Initialisierung#
-  buttons.SetLED(BUTTON_B, true);                                  // LED B an für Initialisierung
   // Display initialisieren
 #ifdef SERIAL_DEBUG
   Debug_port.println(F("SH1107 Init Test"));
@@ -46,15 +39,23 @@ void setup()
     SYS.State = MODE_ERROR;
     SYS.Error_Code = ERROR_DISPLAY;
   }
-  // Display initialisiert, jetzt LEDs entsprechend setzen
+    // Buttons initialisieren
+  buttons.begin(BUTTON_A_PIN, LED_A_PIN, BUTTON_B_PIN, LED_B_PIN); // Button and LED pins initialisieren
+  buttons.SetLED(BUTTON_A, true);                                  // LED A an für Initialisierung#
+  buttons.SetLED(BUTTON_B, true);                                 // LED B an für Initialisierung
+
+    // Display initialisiert, Buttons initilisiert jetzt LEDs entsprechend setzen
   if (ret == 0x00)
   {
     // if  display is ok
     // Show welcome screen
     display.Set_Current_Screen(SCREEN_WELCOME);
+    display.force_update(); // Force update to show welcome screen immediately
+    // Set LEDs based on current screen
     //  not blink with button LEDS
     buttons.SetLED(BUTTON_A, false);
     buttons.SetLED(BUTTON_B, false);
+      display.update();
   }
   else
   {
@@ -68,7 +69,15 @@ void setup()
       buttons.SetLED(BUTTON_B, true);
       delay(500);
     }
+
   }
+  buttons.SetLED(BUTTON_A, true); // LED A an für Initialisierung
+    
+  Serial.begin(115200); // Protokoll kommunikation über HW Uart mit 115200 Baud
+  // Protokoll initialisieren
+  protokoll.begin(Serial); // Protokoll mit HW Serial als Transport initialisieren
+  buttons.SetLED(BUTTON_A, true);  
+  buttons.SetLED(BUTTON_B, true); // LED B an für Initialisierung                      
 
   /* todo  rework */
   /* first there will be debug data on the RX
@@ -77,20 +86,23 @@ void setup()
   // Wait  for S3 sending json data on HW Uart mit 115200 Baud
 
   // wait for data for 5 sec
-  SYS.time_stamp = millis();
-  display.update(); // Update display to show welcome screen while waiting for data
+ 
   /*todo real implementation should wait for specific data or event, here we just wait for 5 seconds to simulate waiting for data */
   while (millis() < SYS.time_stamp + SYS.time_interval)
-    ; // Wait for 5 seconds
-      // wenn daten ankommen
+   {
+    // Here we could also check for specific data or events to proceed, for now we just wait for the time interval to pass
+    // For example, we could check if protokoll has received specific data or if buttons have been pressed to proceed with initialization
+    // This is just a placeholder implementation to simulate waiting for data during initialization
+    
+  }
 
-  buttons.SetLED(BUTTON_B, true);
-
-  buttons.SetLED(BUTTON_A, true);
-  display.Set_Current_Screen(SCREEN_NETWORK);
-  // Initend, now main loop will take over and react on events and update display accordingly
+   SYS.actuallscreen = display.Get_Current_Screen(); // Get current screen to provide the right content and set LEDs accordingly
+   display.Set_Current_Screen(SCREEN_NETWORK);
+   display.force_update(); // Force update to show network screen immediately
+   // Initend, now main loop will take over and react on events and update display accordingly
   // setruntime interval for theloop
-  SYS.time_interval = 10; // Set time interval for loop iteration (e.g., 10 ms)
+  SYS.time_interval = DISPLAY_UPDATE_INTERVAL; // Set time interval for loop iteration (e.g., 10 ms)
+  Set_LEDS(SYS.actuallscreen); // Set LEDs based on current screen
 }
 
 /// @brief
@@ -100,7 +112,6 @@ void setup()
 // The buttons will be turned off after 5sec of inactivity ( no Button pushed, no event occured)
 void loop()
 { 
-
   //SYS.sleep_triggered = false; // Flag to track if sleep mode has been triggered
   // Main loop
   SYS.time_stamp = millis(); // Update current time stamp at the beginning of the loop
@@ -112,7 +123,7 @@ void loop()
   buttons.update(); // return also button state !!!
                     // figure out  the system reaktions
   // Change  Screen  depending on button input and system state
-  
+ 
   Set_next_Screen(display.Get_Current_Screen(), buttons.read()); // todo  implement this function to change screen based on button input and current screen
   Set_LEDS(display.Get_Current_Screen());                        // set LED status based on current screen and sleep mode
   Set_Content(display.Get_Current_Screen());                      // set content for the current screen based on data from Protokoll module and current screen
@@ -157,8 +168,29 @@ void loop()
   // Reakt on system state changes
 
   // Update the display content
-  display.update();
- 
+  // if Screen has changed or if content has changed or if we are in error mode
+  // and error code has changed or if we are in sleep mode and sleep mode is triggered
+ if (protokoll.Get_Content_Changed() ==true)
+ { display.force_update(); // Force update to show new screen immediately
+  
+  }
+
+  if (display.Get_Current_Screen() != SYS.actuallscreen ) // neuer Screen 
+  { 
+     display.force_update(); // Force update to show new screen immediately
+     digitalWrite(LED_BUILTIN, HIGH); // Turn on built-in LED when updating display
+     SYS.time_stamp = millis(); // Update last run time when display is updated
+     display.update(); // Update display if content has changed or if we are in error mode or if sleep mode is triggered
+    
+    // reset update  conditions
+    protokoll.reset_Content_Changed(); // Reset content changed flag after updating display
+    SYS.actuallscreen = display.Get_Current_Screen(); // Update current screen variable after updating display  
+  }
+  else
+  {
+    digitalWrite(LED_BUILTIN, LOW); // Turn off built-in LED when not updating display
+  }
+
 }
 
 // mamas  little helpers 
