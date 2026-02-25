@@ -78,7 +78,7 @@ toggleBlinkState(); // manage blink state
             ShowLearnMode();    
             break;
         case SCREEN_UNI:
-            ShowDisplay();    
+            ShowNormalMode(); // for now we will use the same display method for network and main screen, but with different content
             break;
         case SCREEN_INVALID:
             ShowInvalid();
@@ -117,77 +117,37 @@ void OpenRemiseDisplay::ShowNormalMode() {
     // Code to display normal mode information
     // Show normal operation details on the display
     // Example: Display status info, show operational data, etc.
-    /*Display normal mode information on the screen
-    const char* Title = "Track ";
-    const char* line2 = "Voltage ";
-    const char* line3 = "Current";
-    const char* line4 = "Status";
+    /*Display normal mode information on the screen 
 */
     int8_t myidx =findScreenDescrpitorIndex();
 
     u8g2.firstPage();
     do {
-                // frame im takt blinken lassen 
+         u8g2.setDrawColor(1); // Normal mode for rest
+                        // frame im takt blinken lassen 
         blinking_frame(); 
 
-        u8g2.setFont(u8g2_font_helvR08_tf);
-        //Static Text 
-        // Horizontales zentrieren
-        int16_t x1 = (8); // Fixed position for title
-        int16_t x2 = (50); // Fixed position for labels
 
-       
+        u8g2.setFont(u8g2_font_helvR08_tf);     
         //Statics from Screndescriptor 
         u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
-        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
-        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
-        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
-        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_LINE_1Y, screens[myidx].linie_1);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_LINE_2Y, screens[myidx].linie_2);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_LINE_3Y,screens[myidx].linie_3);
+        u8g2.drawStr(SCREEN_FIXED_X, SCREEN_LINE_4Y,screens[myidx].linie_4);
         //Data dynamik data 
-        u8g2.drawStr(x2, 78,content[0]); // "12,7 V ");
-        u8g2.drawStr(x2, 93,content[1]); // "0,5 A");
-        u8g2.drawStr(x2, 108,content[2]); // "ON");
-        u8g2.drawStr(x2, 120,content[3]); //  "ON");
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_LINE_1Y,content[0]); 
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_LINE_2Y,content[1]); 
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_LINE_3Y,content[2]);
+        u8g2.drawStr(SCREEN_DATA_X, SCREEN_LINE_4Y,content[3]);
 
 
     } while (u8g2.nextPage());
-}   
+}
+
+
 // Display methode  for direkt write 
-void OpenRemiseDisplay::ShowDisplay() {
-    // Code to display uni mode information
-    // Show normal operation details on the display
-    // Example: Display status info, show operational data, etc.
-    /*Display normal mode information on the screen
-*/
-    int8_t myidx =findScreenDescrpitorIndex();
-
-    u8g2.firstPage();
-    do {
-                // frame im takt blinken lassen 
-        blinking_frame(); 
-
-        u8g2.setFont(u8g2_font_helvR08_tf);
-        //Static Text 
-        // Horizontales zentrieren
-        int16_t x1 = (8); // Fixed position for title
-        int16_t x2 = (50); // Fixed position for labels
-
-       
-        //Statics from Screndescriptor 
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
-        u8g2.drawStr(x1, 78, screens[myidx].linie_1);
-        u8g2.drawStr(x1, 93, screens[myidx].linie_2);
-        u8g2.drawStr(x1, 108,screens[myidx].linie_3);
-        u8g2.drawStr(x1, 120,screens[myidx].linie_4);
-        //Data Platzhalter
-        u8g2.drawStr(x2, 78,content[0]);
-        u8g2.drawStr(x2, 93,content[1]); 
-        u8g2.drawStr(x2, 108,content[2]); 
-        u8g2.drawStr(x2, 120,content[3]); 
-
-
-    } while (u8g2.nextPage());
-}   
+  
 // Generic Screens = Welcome, Error, Invalid, Learnmode
 void OpenRemiseDisplay::ShowWelcome() {
     // Code to display a welcome message
@@ -204,7 +164,7 @@ void OpenRemiseDisplay::ShowWelcome() {
 
         // Frame zeichnen
         u8g2.drawFrame(0,0,128,128);
-         u8g2.setDrawColor(1); // Normal mode for rest
+        u8g2.setDrawColor(1); // Normal mode for rest
         u8g2.drawXBMP ((LOGO_x+5), (LOGO_y+5), 103, 21, openeremise_logo_103_21); // Display logo at (5,115)
         u8g2.setFont(u8g2_font_helvR08_tf);
 
@@ -325,7 +285,7 @@ void OpenRemiseDisplay::Set_Current_Screen(uint8_t screen_id) {
              }  
         } 
         current_screen = static_cast<ScreenId>(screen_id);
-        update_screen = true; // Mark screen for update
+        // update_screen = true; // Mark screen for update
     }
 }
 
@@ -381,7 +341,7 @@ void OpenRemiseDisplay::toggleBlinkState() {
           for(int i=0; i<5; i+=2) {
                 u8g2.drawFrame(i, i, 128 - 2*i, 128 - 2*i); // Draw the inner frame
                 // LOGO zeichnen        
-        u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); // Display small logo at (5,115)
+         u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); // Display small logo at (5,115)
             }
         } 
         else {                                
