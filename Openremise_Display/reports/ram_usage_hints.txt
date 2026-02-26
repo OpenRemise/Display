@@ -1,0 +1,57 @@
+Projekt: Openremise_Display
+Datum: 26. Februar 2026
+
+🧠 **RAM‑Analyse / Hinweise**
+
+1. **Globale Objekte**
+   • `OpenRemiseDisplay display;`
+   • `Buttons buttons;`
+   • `OpenRemiseProtokoll protokoll;`
+   -> diese Instanzen leben im .bss‑Segment. Vermeidung oder Auslagerung in statische Funktionen (z.B. als lokale `static` in `setup`) spart je nach Klasse ein paar Dutzend Bytes.
+
+2. **Globale Variablen in Headern**
+   • `const char* content[5];` (RAM: 5×2 oder 5×4 Bytes je nach Architektur)
+   • `uint8_t Display_error_code;`
+   • `const char* Display_error_string;`
+   • `const char* Display_info_string = nullptr;`
+   -> Das gleiche gilt für andere [globalen Variablen] in `main.h`\-SYS–Struktur etc. Alle globalen Pointers/Arrays belegen RAM. Nutzen Sie `PROGMEM` für konstante Texte oder definieren Sie sie lokal.
+
+3. **Strings**
+   • Permanente Texte in `screens`‑Array liegen bereits im Flash (string literals), das ist gut.
+   • Achten Sie darauf, dass Aufrufe wie `display.set_error_code(..., "KOM ERROR!");` den Literal im Flash speichern; der Pointer selbst belegt RAM (4 Bytes).
+   • Falls Sie temporäre Zeichenketten konstruieren (z.B. via `String`-Klasse, im Projekt bisher nicht verwendet) vermeiden, diese speichern.
+
+4. **Protokoll‑Puffer**
+   • `char data[IDX_MAX][MAX_STRING];` → bei den aktuellen Werten (10×16) ≈ 160 Bytes.
+   • `char rxBuffer[RX_BUFFER_SIZE];` → 25 Bytes.
+   • Überlegen, ob `MAX_STRING` schrumpfbar oder sich die indizierten Felder anders handhaben lassen (Zeiger, nur bei Bedarf). 
+
+5. **Datentypen**
+   • In `SYS_` werden `double` für Zeitstempel und Intervalle verwendet. Auf AVR ist `double` identisch zu `float` (4 Bytes), aber bei anderen Architekturen 8 Bytes. Nutzen Sie `uint32_t` bzw. `unsigned long` für millis()‑basierte Zeiten, das spart ggf. 4 Bytes pro Feld.
+   • Viele `bool`‑Felder in `SYS_` und `data_controll_t` können ggf. zu Bitfields zusammengefasst werden, wenn RAM streng ist.
+
+6. **Unnötige globale Definitionen / Makros**
+   • Makros wie `ON`,`OFF`,`INIT`,`RUN` belegen keinen RAM, aber sie erhöhen die Binärgröße.
+
+7. **SD‑Card / EEPROM**
+   • Nicht verwendet, aber falls geplant: nutzen Sie `PROGMEM` für große, feststehende Daten (Logos sind bereits im PROGMEM).
+
+8. **Header‑Includes**
+   • Eingebundene Bibliotheken (z. B. `Arduino.h`, `SoftwareSerial.h`) können ungenutzte globale Objekte erzeugen. Verwenden Sie Forward‑Deklarationen wo möglich.
+
+9. **Fehlende Speicheroptimierungen**
+   • In `Display.h` ist `const char* content[5];` ein Array von Zeigern; wenn festgelegte Texte häufig gleich sind, könnte man direkt `const char content[5][...];` im Flash deklarieren.
+   • Das `screens`‑Array nutzt `const char* const` – perfekt. Reduzieren Sie `NUM_SCREENS` auf das tatsächlich genutzte (aktuell 7). Jeder Eintrag belegt 7× Zeigern + bools.
+
+🔧 **Vorschläge zur Umsetzung**
+
+- Verschieben Sie globale Klasse‑Instanzen in `setup()` als `static` oder lokale Objekte, wenn sie nicht von anderen Modulen vor `setup()` gebraucht werden.
+- Tauschen Sie `double` gegen `uint32_t` bei Zeitwerten.
+- Verwenden Sie `PROGMEM` für konstante Zeichenketten und Logos (Logo‑Arrays sind schon im PROGMEM).
+- Überprüfen Sie alle Arrays auf Überdimensionierung (z.B. 25‑Byte Rx‑Buffer, `RX_BUFFER_SIZE`).
+- Entfernen Sie ungenutzte Globalvariablen oder Header‑Includes.
+
+🎯 Mit diesen Punkten lassen sich typischerweise mehrere hundert Bytes RAM einsparen. Eine genaue Messung erfolgt mit dem Linker‑Map oder `avr-size`/`arm-none-eabi-size`.
+
+---
+Empfohlen: Führen Sie vor und nach jeder Änderung einen Build durch und notieren Sie das RAM‑Verbrauchs‑Reporting (z.B. `Sketch uses 5,262 bytes (16%) of program storage space. Global variables use 2,075 bytes (101%) of dynamic memory.`) dafür.
