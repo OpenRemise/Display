@@ -47,7 +47,7 @@
 //define Json Data elements 
 #define JSON_ID         "version"// Unique identifier for the SW Version S3
 #define JSON_IP         "ip"    // IP address as an array of 4 integers
-#define JSON_STATUS     "status"    // Status code
+#define JSON_STATUS     "state"    // Status code
 #define JSON_WIFI_SSID   "ssid"  // WiFi SSID
 #define JSON_MDNS         "mdns"
 #define JSON_WIFI_PWR     "rssi"   // WiFi Power
@@ -55,7 +55,8 @@
 #define JSON_TRK_VOLTAGE  "voltage" // Track voltage
 #define JSON_TRK_CURRENT  "current" // Track current
 #define JSON_SUP_VOLTAGE  "sup_voltage" // Supply voltage
-#define JSON_Service      "service"   // Service code
+#define JSON_Service      "service"   // Service mode POM// Direct cv
+
 
 /*Unsuported yet
 #define JSON_ERROR_CODE     "error_code"        // Error code
