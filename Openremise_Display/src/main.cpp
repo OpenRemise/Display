@@ -53,8 +53,7 @@ void setup()
     display.force_update(); // Force update to show welcome screen immediately
     // Set LEDs based on current screen
     //  not blink with button LEDS
-    buttons.SetLED(BUTTON_A, false);
-    buttons.SetLED(BUTTON_B, false);
+   
       display.update();
   }
   else
@@ -71,13 +70,11 @@ void setup()
     }
 
   }
-  buttons.SetLED(BUTTON_A, true); // LED A an für Initialisierung
-    
+ 
   Serial.begin(115200); // Protokoll kommunikation über HW Uart mit 115200 Baud
   // Protokoll initialisieren
   protokoll.begin(Serial); // Protokoll mit HW Serial als Transport initialisieren
-  buttons.SetLED(BUTTON_A, true);  
-  buttons.SetLED(BUTTON_B, true); // LED B an für Initialisierung                      
+                     
 
   /* todo  rework */
   /* first there will be debug data on the RX
@@ -172,15 +169,16 @@ void loop()
   // and error code has changed or if we are in sleep mode and sleep mode is triggered
  if (protokoll.Get_Content_Changed() ==true)
  { display.force_update(); // Force update to show new screen immediately
-  
+   SYS.time_stamp = millis(); // Update last run time when display is updated
+
   }
 
   if (display.Get_Current_Screen() != SYS.actuallscreen ) // neuer Screen 
   { 
      display.force_update(); // Force update to show new screen immediately
-     digitalWrite(LED_BUILTIN, HIGH); // Turn on built-in LED when updating display
+     
      SYS.time_stamp = millis(); // Update last run time when display is updated
-     display.update(); // Update display if content has changed or if we are in error mode or if sleep mode is triggered
+ // Update display if content has changed or if we are in error mode or if sleep mode is triggered
     
     // reset update  conditions
     protokoll.reset_Content_Changed(); // Reset content changed flag after updating display
@@ -188,9 +186,11 @@ void loop()
   }
   else
   {
-    digitalWrite(LED_BUILTIN, LOW); // Turn off built-in LED when not updating display
-  }
 
+  }
+    
+  
+  display.update(); // Update display (e.g., refresh screen, handle animations, etc.)
 }
 
 // mamas  little helpers 
@@ -270,18 +270,19 @@ void Set_LEDS(ScreenId idx)
 /// @brief Sets the content for a specific screen index
 /// @param idx The screen index to set content for
 void Set_Content(ScreenId idx)
-{
+{ 
+  
   switch (idx)
   {
   case SCREEN_MAIN:
     // Track daten
     // Voltage  format should be <XX.XX V> same for current <XX.XX A> and status <status code> and service <service code>
     //SCREEN_MAIN, false,"Track ","Voltage : ","Current :","Status :","Mode :"
-    display.Set_Current_content(protokoll.getData(IDX_TRK_VOLTAGE), protokoll.getData(IDX_TRK_CURRENT), protokoll.getData(IDX_STATUS),  protokoll.getData(IDX_NONE), "  ");
+    display.Set_Current_content(protokoll.getData(IDX_TRK_VOLTAGE),protokoll.getData(IDX_TRK_CURRENT), protokoll.getData(IDX_STATUS),  protokoll.getData(IDX_NONE), "  ");
     break;
   case SCREEN_NETWORK:
     // network daten  " IP ","mDNS ","SSID ","RSSI "
-    display.Set_Current_content(protokoll.getData(IDX_IP), protokoll.getData(IDX_JSON_MDNS), protokoll.getData(IDX_WIFI_PWR), protokoll.getData(IDX_STATUS), "  ");
+    display.Set_Current_content(protokoll.getData(IDX_IP), protokoll.getData(IDX_JSON_MDNS), protokoll.getData(IDX_WIFI_SSID), protokoll.getData(IDX_WIFI_PWR), "  ");
     break;
   case SCREEN_LEARN:
     //  Not implemented yet
@@ -289,7 +290,7 @@ void Set_Content(ScreenId idx)
     break;
   case SCREEN_UNI:
     // free screen  with free text
-        display.Set_Current_content( "test 1", "test 2", "test 3", "test 4", "test 5");
+        display.Set_Current_content( protokoll.getData(IDX_ID), "test 2", "test 3", "test 4", "test 5");
     break;
 
   default:

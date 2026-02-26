@@ -14,7 +14,7 @@
 
 //#define SERIAL_DEBUG // Enable Serial debugging
 #define Feedback_LED_PIN 13 // Pin for Feedback LED
-#define SLEEP_TIMEOUT 10000 // Time in milliseconds before entering sleep mode
+#define SLEEP_TIMEOUT 30000 // Time in milliseconds before entering sleep mode
 #define DISPLAY_UPDATE_INTERVAL 150 // Minimum time interval between display updates in milliseconds
 #define WAIT_TIME_STARTTIME 5000 // Time to wait for data at startup in milliseconds
 // Pin usage definitions
