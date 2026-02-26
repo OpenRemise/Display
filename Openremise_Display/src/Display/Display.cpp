@@ -31,7 +31,7 @@ uint8_t OpenRemiseDisplay::begin() {
         Serial.println(F("OpenRemiseDisplay: INIT ERROR!"));
         return 0xFF; // Fehler
     }
-
+   u8g2.setContrast(150); // Set contrast to 128 (half of max value)
   Set_Current_Screen(SCREEN_INVALID);// set to last screen to force update
   initialized_display = true;
   BLink_STATE = true;
@@ -66,19 +66,15 @@ toggleBlinkState(); // manage blink state
             ShowWelcome();
             break;
         case SCREEN_MAIN:
+        case SCREEN_NETWORK:
+        case SCREEN_UNI:
             ShowNormalMode();
             break;
         case SCREEN_ERROR:
             ShowError();
             break;
-        case SCREEN_NETWORK:
-             ShowNormalMode(); // for now we will use the same display method for network and main screen, but with different content
-            break;
         case SCREEN_LEARN:
             ShowLearnMode();    
-            break;
-        case SCREEN_UNI:
-            ShowNormalMode(); // for now we will use the same display method for network and main screen, but with different content
             break;
         case SCREEN_INVALID:
             ShowInvalid();
@@ -87,7 +83,7 @@ toggleBlinkState(); // manage blink state
             break;
     }
     update_screen = false; // Reset update flag after updating
- 
+    digitalWrite(LED_BUILTIN, LOW); // Turn off built-in LED after updating display
 }
 
 
@@ -120,17 +116,17 @@ void OpenRemiseDisplay::ShowNormalMode() {
     /*Display normal mode information on the screen 
 */
     int8_t myidx =findScreenDescrpitorIndex();
-
+    
     u8g2.firstPage();
     do {
-         u8g2.setDrawColor(1); // Normal mode for rest
+             u8g2.setDrawColor(1); // Normal mode for rest 
                         // frame im takt blinken lassen 
-        blinking_frame(); 
-
-
+         blinking_frame(); 
+   
         u8g2.setFont(u8g2_font_helvR08_tf);     
+       
         //Statics from Screndescriptor 
-        u8g2.drawStr(SCREEN_Title_x, SCREEN_Title_y, screens[myidx].title);
+        u8g2.drawStr(SCREEN_Title_x - (u8g2.getStrWidth(screens[myidx].title))/2 , SCREEN_Title_y, screens[myidx].title);
         u8g2.drawStr(SCREEN_FIXED_X, SCREEN_LINE_1Y, screens[myidx].linie_1);
         u8g2.drawStr(SCREEN_FIXED_X, SCREEN_LINE_2Y, screens[myidx].linie_2);
         u8g2.drawStr(SCREEN_FIXED_X, SCREEN_LINE_3Y,screens[myidx].linie_3);
@@ -140,8 +136,7 @@ void OpenRemiseDisplay::ShowNormalMode() {
         u8g2.drawStr(SCREEN_DATA_X, SCREEN_LINE_2Y,content[1]); 
         u8g2.drawStr(SCREEN_DATA_X, SCREEN_LINE_3Y,content[2]);
         u8g2.drawStr(SCREEN_DATA_X, SCREEN_LINE_4Y,content[3]);
-
-
+       
     } while (u8g2.nextPage());
 }
 
@@ -255,7 +250,7 @@ void OpenRemiseDisplay::ShowLearnMode() {
     do {
         // Frame zeichnen
         u8g2.drawFrame(0,0,128,128);
-         u8g2.setDrawColor(1); // Normal mode for rest
+        u8g2.setDrawColor(1); // Normal mode for rest
         u8g2.setFont(u8g2_font_helvR08_tf);
 
         // Horizontales zentrieren
@@ -335,19 +330,24 @@ void OpenRemiseDisplay::toggleBlinkState() {
 
      void OpenRemiseDisplay::blinking_frame()
      {
-       if(BLink_STATE && screens[current_screen].blink) {
+        
+         if(BLink_STATE && screens[current_screen].blink) {
                    //FRAME zeichnen
-          u8g2.setDrawColor(1); // Normal mode
-          for(int i=0; i<5; i+=2) {
-                u8g2.drawFrame(i, i, 128 - 2*i, 128 - 2*i); // Draw the inner frame
-                // LOGO zeichnen        
-         u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); // Display small logo at (5,115)
+        //  u8g2.setDrawColor(1); // Normal mode
+             // LOGO zeichnen 
+           u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); // Display small logo at (5,115)
+             for(int i=0; i<5; i+=2) {
+            u8g2.drawFrame(i, i, 128 - 2*i, 128 - 2*i); // Draw the inner frame
             }
         } 
-        else {                                
-          u8g2.drawFrame(0,0,128,128); // Draw the outer frame only when not blinking
-          // LOGO zeichnen        
-        u8g2.drawXBMP (LOGO_x, LOGO_y, 48, 48, openeremise_logo_48_48); // Display logo at (5,115)
+        else {  
+                     //FRAME zeichnen
+      //      u8g2.setDrawColor(1); // Normal mode
+         u8g2.drawXBMP (LOGO_x, LOGO_y, 32, 32, openeremise_logo); 
+         
+          u8g2.drawFrame(0,0,127,127); // Draw the outer frame only when not blinking
+          digitalWrite(LED_BUILTIN, HIGH); 
+          
         }
 
      }

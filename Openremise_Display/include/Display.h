@@ -11,14 +11,14 @@
 
 //#define I2C_SCANNER
 //SCREEN position DEFINES
-#define SCREEN_Title_x 75
-#define SCREEN_Title_y 30
-#define LOGO_x 6
-#define LOGO_y 5
-#define SCREEN_FIXED_X 8
-#define SCREEN_FIXED_Y 78
+#define SCREEN_Title_x 128-32 
+#define SCREEN_Title_y 20
+#define LOGO_x 8
+#define LOGO_y 8
+#define SCREEN_FIXED_X 5
+#define SCREEN_FIXED_Y 75
 #define SCREEN_LINE_DIS 15
-#define SCREEN_DATA_X 45
+#define SCREEN_DATA_X 50
 #define SCREEN_LINE_1Y SCREEN_FIXED_Y
 #define SCREEN_LINE_2Y SCREEN_LINE_1Y +SCREEN_LINE_DIS
 #define SCREEN_LINE_3Y SCREEN_LINE_2Y +SCREEN_LINE_DIS
