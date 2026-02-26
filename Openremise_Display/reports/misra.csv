@@ -1,0 +1,13 @@
+src\Buttons\Buttons.cpp,4,warning,uninitMemberVar,Member variable 'Buttons::pinA' is not initialized in the constructor.
+src\Buttons\Buttons.cpp,4,warning,uninitMemberVar,Member variable 'Buttons::pinB' is not initialized in the constructor.
+src\Buttons\Buttons.cpp,4,warning,uninitMemberVar,Member variable 'Buttons::ledA' is not initialized in the constructor.
+src\Buttons\Buttons.cpp,4,warning,uninitMemberVar,Member variable 'Buttons::ledB' is not initialized in the constructor.
+include\Logo.h,7,error,unknownMacro,There is an unknown macro here somewhere. Configuration is required. If PROGMEM is a macro then please configure it.
+src\Protokoll\Protokoll_2.cpp,15,warning,uninitMemberVar,Member variable 'OpenRemiseProtokoll::data_controll' is not initialized in the constructor.
+src\Protokoll\Protokoll_2.cpp,15,warning,uninitMemberVar,Member variable 'OpenRemiseProtokoll::data' is not initialized in the constructor.
+src\Protokoll\Protokoll_2.cpp,15,warning,uninitMemberVar,Member variable 'OpenRemiseProtokoll::rxBuffer' is not initialized in the constructor.
+src\Protokoll\Protokoll_2.cpp,15,warning,uninitMemberVar,Member variable 'OpenRemiseProtokoll::rxComplete' is not initialized in the constructor.
+src\Protokoll\Protokoll_2.cpp,80,style,functionStatic,The member function 'OpenRemiseProtokoll::getProtIndex' can be static.
+src\Protokoll\Protokoll_2.cpp,48,portability,invalidPrintfArgType_sint,%d in format string (no. 1) requires 'int' but the argument type is 'size_t {aka unsigned long long}'.
+src\Protokoll\Protokoll_2.cpp,16,style,misra-c2012-12.3,misra violation (use --rule-texts=<file> to get proper output)
+src\Protokoll\Protokoll_2.cpp,82,error,misra-config,Because of missing configuration, misra checking is incomplete. There can be false negatives! Variable 'nullptr' is unknown
