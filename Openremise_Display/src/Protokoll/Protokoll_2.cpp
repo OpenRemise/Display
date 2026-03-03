@@ -45,7 +45,7 @@ uint8_t OpenRemiseProtokoll::begin(Stream& transport)
     data_controll.Flow_control = Flow_None; // Initialize flow control state
     data_controll.currentIdx  = IDX_NONE;
  for (size_t i = 0U; i < IDX_MAX; ++i) {
-        sprintf(data[i], "----> ,%d", i); // Initialize data array with Number of index as string for testing,
+        sprintf(data[i], "--> ,%d", i); // Initialize data array with Number of index as string for testing,
         // can be replaced with empty strings or other default values as needed
     }
       return 0; // Placeholder return value
@@ -234,9 +234,7 @@ void OpenRemiseProtokoll::process()
 
   data_controll. Data_received= false;
   data_controll.lastDataMillis = millis();
-  if (data_controll.Data_error != Data_Timeout) {
-  data_controll.Data_error = Data_Valid;
-  }
+
 
 }
 
