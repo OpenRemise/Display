@@ -90,8 +90,20 @@ void setup()
     // Here we could also check for specific data or events to proceed, for now we just wait for the time interval to pass
     // For example, we could check if protokoll has received specific data or if buttons have been pressed to proceed with initialization
     // This is just a placeholder implementation to simulate waiting for data during initialization
+    protokoll.update();
+
+    if(protokoll.Get_Protokoll_Error() == Data_Valid)
+    { 
+    display.Set_Current_content( protokoll.getData(IDX_ID),SW_Version,"","","")  ;
+      display.force_update();
+      display.update();
+
+
+    }
     
+
   }
+
 
    SYS.actuallscreen = display.Get_Current_Screen(); // Get current screen to provide the right content and set LEDs accordingly
    display.Set_Current_Screen(SCREEN_NETWORK);
@@ -167,11 +179,7 @@ void loop()
   // Update the display content
   // if Screen has changed or if content has changed or if we are in error mode
   // and error code has changed or if we are in sleep mode and sleep mode is triggered
- if (protokoll.Get_Content_Changed() ==true)
- { display.force_update(); // Force update to show new screen immediately
-   SYS.time_stamp = millis(); // Update last run time when display is updated
 
-  }
 
   if (display.Get_Current_Screen() != SYS.actuallscreen ) // neuer Screen 
   { 
@@ -185,7 +193,13 @@ void loop()
     SYS.actuallscreen = display.Get_Current_Screen(); // Update current screen variable after updating display  
   }
   else
-  {
+  { // New Data received 
+     if ((protokoll.Get_Content_Changed() ==true)
+    &&( protokoll.Get_Protokoll_Error() == Data_Valid)) // Wait for the  complet Stream 
+ {  display.force_update(); // Force update to show new screen immediately
+    SYS.time_stamp = millis(); // Update last run time when display is updated
+    protokoll.reset_Content_Changed();
+  }
 
   }
     
@@ -198,12 +212,9 @@ void loop()
 
 void Set_next_Screen(ScreenId id, uint8_t button_value)
 {
- uint8_t index=0; 
+ uint8_t       index=0; 
 
-  if (button_value == NO_BUTTONS)
-  {
-    return; // No buttons pressed, do not change screen
-  }
+
   if (button_value >= RESET_REQUEST)
   {
     // both buttons held for reset request
@@ -222,6 +233,14 @@ void Set_next_Screen(ScreenId id, uint8_t button_value)
     {
        index=index-1; 
     }
+
+  // if we flash we will show the Learn screen
+  // Dominant condition
+ if (strcmp(protokoll.getData(IDX_STATUS),"OTA") == 0)
+  {
+              index = SCREEN_LEARN;
+            }
+
  //we have to take care that the index is always between 0 and NUM_SCREENS-1
     if (index >= NUM_MENUE_SCREENS)
     {
@@ -286,6 +305,7 @@ void Set_Content(ScreenId idx)
     break;
   case SCREEN_LEARN:
     //  Not implemented yet
+    //Show OTA 
 
     break;
   case SCREEN_UNI:
