@@ -151,8 +151,8 @@ void OpenRemiseDisplay::ShowWelcome() {
     // Display welcome message on the screen
  
     const char* line1=  "Welcome!";
-    const char* line2 = "Open Remise Rev 0.6" ;
-    const char* line3 = "Display Rev 0.2";
+    const char* line2 = content[0];  // todo make dynamic
+    const char* line3 = content[1];
     const char* line4 = "Wait for data...";
     u8g2.firstPage();
     do {
@@ -245,7 +245,7 @@ void OpenRemiseDisplay::ShowLearnMode() {
 
     const char* line1=  "Learn Mode";
     const char* line2 = "Please follow instructions" ;
-    const char* line3 = "not implemented yet";
+    const char* line3 = "Software Update";
     u8g2.firstPage();
     do {
         // Frame zeichnen
